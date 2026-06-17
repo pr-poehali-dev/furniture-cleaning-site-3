@@ -142,37 +142,60 @@ const Index = () => {
       </header>
 
       {/* Hero */}
-      <section id="hero" className="relative pt-28 md:pt-40 pb-20 md:pb-28 grain">
-        <div className="absolute top-20 -right-20 w-80 h-80 rounded-full bg-accent/30 blur-3xl" />
-        <div className="absolute top-40 -left-20 w-72 h-72 rounded-full bg-primary/20 blur-3xl" />
+      <section id="hero" className="relative pt-28 md:pt-36 pb-16 md:pb-24 grain overflow-hidden">
+        <div className="absolute top-20 -right-20 w-80 h-80 rounded-full bg-accent/20 blur-3xl" />
+        <div className="absolute top-40 -left-20 w-72 h-72 rounded-full bg-primary/10 blur-3xl" />
         <div className="container relative px-4 md:px-8">
-          <Reveal>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary text-primary text-sm font-semibold mb-6">
-              <Icon name="MapPin" size={15} /> Москва и Московская область
-            </span>
-          </Reveal>
-          <Reveal delay={80}>
-            <h1 className="font-display font-black text-4xl md:text-6xl lg:text-7xl leading-[1.05] max-w-4xl">
-              Химчистка мебели <span className="text-primary">на дому</span> в Москве и области
-            </h1>
-          </Reveal>
-          <Reveal delay={160}>
-            <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl">
-              Фиксируем цену до выезда специалиста. Оплата только после результата.
-            </p>
-          </Reveal>
-          <Reveal delay={240}>
-            <div className="mt-9 flex flex-col sm:flex-row gap-3">
-              <Button onClick={() => scrollTo('contacts')} size="lg" className="rounded-full text-base font-semibold h-14 px-8">
-                <Icon name="Calculator" size={20} className="mr-2" /> Рассчитать стоимость
-              </Button>
-              <a href={TELEGRAM} target="_blank" rel="noreferrer">
-                <Button variant="outline" size="lg" className="rounded-full text-base font-semibold h-14 px-8 w-full border-2">
-                  <Icon name="Send" size={20} className="mr-2" /> Написать в Telegram
-                </Button>
-              </a>
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <div>
+              <Reveal>
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary text-primary text-sm font-semibold mb-6">
+                  <Icon name="MapPin" size={15} /> Москва и Московская область
+                </span>
+              </Reveal>
+              <Reveal delay={80}>
+                <h1 className="font-display font-black text-4xl md:text-5xl lg:text-6xl leading-[1.05]">
+                  Химчистка мебели <span className="text-primary">на дому</span> в Москве и области
+                </h1>
+              </Reveal>
+              <Reveal delay={160}>
+                <p className="mt-6 text-lg md:text-xl text-muted-foreground">
+                  Фиксируем цену до выезда специалиста. Оплата только после результата.
+                </p>
+              </Reveal>
+              <Reveal delay={240}>
+                <div className="mt-9 flex flex-col sm:flex-row gap-3">
+                  <Button onClick={() => scrollTo('contacts')} size="lg" className="rounded-full text-base font-semibold h-14 px-8">
+                    <Icon name="Calculator" size={20} className="mr-2" /> Рассчитать стоимость
+                  </Button>
+                  <a href={TELEGRAM} target="_blank" rel="noreferrer">
+                    <Button variant="outline" size="lg" className="rounded-full text-base font-semibold h-14 px-8 w-full border-2">
+                      <Icon name="Send" size={20} className="mr-2" /> Написать в Telegram
+                    </Button>
+                  </a>
+                </div>
+              </Reveal>
             </div>
-          </Reveal>
+            <Reveal delay={180} className="hidden lg:block">
+              <div className="relative">
+                <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 scale-105" />
+                <img
+                  src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/39dbc95d-9dc6-4acc-b491-1764daee6a51.jpg"
+                  alt="Чистый диван после химчистки"
+                  className="relative rounded-3xl w-full object-cover shadow-2xl aspect-[4/3]"
+                />
+                <div className="absolute -bottom-4 -left-4 bg-card border border-border rounded-2xl px-5 py-3 shadow-lg flex items-center gap-3">
+                  <span className="grid place-items-center w-10 h-10 rounded-xl bg-accent/20 text-accent">
+                    <Icon name="Sparkles" size={22} />
+                  </span>
+                  <div>
+                    <p className="font-display font-bold text-sm">Результат виден сразу</p>
+                    <p className="text-xs text-muted-foreground">Оплата после работы</p>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
 
