@@ -15,7 +15,7 @@ const NAV = [
   { id: 'services', label: 'Услуги' },
   { id: 'packages', label: 'Пакеты' },
   { id: 'price', label: 'Прайс' },
-  { id: 'calculator', label: 'Калькулятор' },
+  { id: 'calculator', label: 'Подбор' },
   { id: 'process', label: 'Процесс' },
   { id: 'faq', label: 'FAQ' },
   { id: 'contacts', label: 'Контакты' },
@@ -163,69 +163,64 @@ function BeforeAfterSlider({ before, after, item }: { before: string; after: str
   );
 }
 
-function PriceCalculator() {
-  const [counts, setCounts] = useState<Record<string, number>>(
-    Object.fromEntries(CALC_ITEMS.map((i) => [i.id, 0]))
-  );
+function FurniturePicker() {
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
-  const change = (id: string, delta: number) => {
-    setCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] ?? 0) + delta) }));
+  const toggle = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) { next.delete(id); } else { next.add(id); }
+      return next;
+    });
   };
 
-  const total = CALC_ITEMS.reduce((sum, item) => sum + item.price * counts[item.id], 0);
-  const hasItems = total > 0;
+  const hasItems = selected.size > 0;
 
   const waText = CALC_ITEMS
-    .filter((i) => counts[i.id] > 0)
-    .map((i) => `${i.label} × ${counts[i.id]}`)
+    .filter((i) => selected.has(i.id))
+    .map((i) => i.label)
     .join(', ');
-  const waLink = `${WHATSAPP}?text=${encodeURIComponent(`Хочу рассчитать химчистку: ${waText}. Итого от ${total.toLocaleString('ru-RU')} ₽`)}`;
+  const waLink = `${WHATSAPP}?text=${encodeURIComponent(`Здравствуйте! Хочу узнать стоимость химчистки: ${waText}. Подскажите цену?`)}`;
 
   return (
     <div className="bg-card border border-border rounded-3xl p-6 md:p-8 max-w-2xl mx-auto shadow-sm">
-      <div className="space-y-3 mb-6">
-        {CALC_ITEMS.map((item) => (
-          <div key={item.id} className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="grid place-items-center w-9 h-9 rounded-xl bg-secondary text-primary flex-shrink-0">
-                <Icon name={item.icon} size={18} fallback="Sofa" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+        {CALC_ITEMS.map((item) => {
+          const active = selected.has(item.id);
+          return (
+            <button
+              key={item.id}
+              onClick={() => toggle(item.id)}
+              className={`flex flex-col items-center gap-2 rounded-2xl border-2 p-4 transition-all text-center ${
+                active
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'border-border bg-background hover:border-primary/40 text-foreground'
+              }`}
+            >
+              <span className={`grid place-items-center w-10 h-10 rounded-xl transition-colors ${active ? 'bg-primary text-primary-foreground' : 'bg-secondary text-primary'}`}>
+                <Icon name={item.icon} size={20} fallback="Sofa" />
               </span>
-              <span className="font-medium truncate">{item.label}</span>
-              <span className="text-muted-foreground text-sm whitespace-nowrap hidden sm:block">
-                от {item.price.toLocaleString('ru-RU')} ₽
-              </span>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <button
-                onClick={() => change(item.id, -1)}
-                disabled={counts[item.id] === 0}
-                className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-lg font-bold disabled:opacity-30 hover:bg-secondary transition-colors"
-              >−</button>
-              <span className="w-5 text-center font-bold text-lg tabular-nums">{counts[item.id]}</span>
-              <button
-                onClick={() => change(item.id, 1)}
-                className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-bold hover:bg-primary/90 transition-colors"
-              >+</button>
-            </div>
-          </div>
-        ))}
+              <span className="font-medium text-sm leading-snug">{item.label}</span>
+              {active && <Icon name="CheckCircle2" size={16} className="text-primary" />}
+            </button>
+          );
+        })}
       </div>
 
       <div className="border-t border-border pt-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          {hasItems ? (
-            <>
-              <p className="text-sm text-muted-foreground">Итого от</p>
-              <p className="font-display font-black text-3xl text-primary">{total.toLocaleString('ru-RU')} ₽</p>
-            </>
-          ) : (
-            <p className="text-muted-foreground text-sm">Выберите мебель для расчёта</p>
-          )}
-        </div>
-        <a href={hasItems ? waLink : WHATSAPP} target="_blank" rel="noreferrer" className="w-full sm:w-auto">
-          <Button size="lg" disabled={!hasItems} className="rounded-full font-semibold h-12 px-7 w-full bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-40">
+        <p className="text-muted-foreground text-sm text-center sm:text-left">
+          {hasItems
+            ? `Выбрано: ${Array.from(selected).map((id) => CALC_ITEMS.find((i) => i.id === id)?.label).join(', ')}`
+            : 'Отметьте, что нужно почистить'}
+        </p>
+        <a href={hasItems ? waLink : undefined} target="_blank" rel="noreferrer" className="w-full sm:w-auto">
+          <Button
+            size="lg"
+            disabled={!hasItems}
+            className="rounded-full font-semibold h-12 px-7 w-full bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-40"
+          >
             <Icon name="MessageCircle" size={18} className="mr-2" />
-            {hasItems ? 'Заказать в WhatsApp' : 'Выберите позиции'}
+            Узнать точную цену
           </Button>
         </a>
       </div>
@@ -450,11 +445,11 @@ const Index = () => {
       <section id="calculator" className="py-16 md:py-24 bg-secondary/40">
         <div className="container px-4 md:px-8">
           <Reveal>
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-3">Рассчитайте стоимость</h2>
-            <p className="text-center text-muted-foreground mb-10">Выберите мебель — и узнайте цену прямо сейчас</p>
+            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-3">Что нужно почистить?</h2>
+            <p className="text-center text-muted-foreground mb-10">Отметьте мебель — и мы сразу назовём точную цену в WhatsApp</p>
           </Reveal>
           <Reveal delay={80}>
-            <PriceCalculator />
+            <FurniturePicker />
           </Reveal>
         </div>
       </section>
