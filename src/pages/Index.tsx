@@ -66,6 +66,36 @@ const FAQ = [
   { q: 'Есть ли гарантия?', a: 'Если что-то не устроит, оперативно вернёмся и исправим.' },
 ];
 
+const REVIEWS = [
+  {
+    name: 'Елена М.',
+    location: 'Москва, Митино',
+    text: 'Диван после кота был в ужасном состоянии — пятна, запах. После химчистки выглядит как новый! Мастер приехал вовремя, всё сделал аккуратно. Однозначно рекомендую.',
+    rating: 5,
+    before: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/6910d211-aea5-4e1a-8ecf-2d9e54b597b9.jpg',
+    after: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/a9c4367d-8747-4a70-a6f2-20814ce24893.jpg',
+    item: 'Диван',
+  },
+  {
+    name: 'Антон К.',
+    location: 'Москва, Реутов',
+    text: 'Кресло было с жирными пятнами — думал уже выбрасывать. Ребята почистили за час, пятна ушли полностью. Цена совпала с тем, что назвали по телефону — без сюрпризов.',
+    rating: 5,
+    before: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/7caab006-a9e3-41b0-a41c-578d1eda0f09.jpg',
+    after: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/6bac44ef-4bb3-4711-a90d-dd7a6d211feb.jpg',
+    item: 'Кресло',
+  },
+  {
+    name: 'Ольга Д.',
+    location: 'Москва, Химки',
+    text: 'Заказала чистку матраса — даже не ожидала такого результата. Запах пропал полностью, цвет обновился. Дети теперь спят спокойно. Буду заказывать каждый год.',
+    rating: 5,
+    before: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/9425f0dc-fe46-487b-bfc5-07150904b26d.jpg',
+    after: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/b7eb92aa-a295-4b0e-ba4d-3c44cdbda9fd.jpg',
+    item: 'Матрас',
+  },
+];
+
 const TELEGRAM = 'https://t.me/';
 const WHATSAPP = 'https://wa.me/';
 const PHONE = 'tel:+70000000000';
@@ -96,6 +126,7 @@ function Reveal({ children, className = '', delay = 0 }: { children: React.React
 
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSlides, setActiveSlides] = useState<Record<number, 'before' | 'after'>>({ 0: 'before', 1: 'before', 2: 'before' });
 
   const scrollTo = (id: string) => {
     setMenuOpen(false);
@@ -297,6 +328,61 @@ const Index = () => {
                     <Icon name={s.icon} size={24} />
                   </div>
                   <p className="font-semibold text-lg leading-snug pr-8">{s.title}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Reviews */}
+      <section id="reviews" className="py-16 md:py-24">
+        <div className="container px-4 md:px-8">
+          <Reveal>
+            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-3">Отзывы клиентов</h2>
+            <p className="text-center text-muted-foreground mb-12">Реальные результаты — нажмите на карточку, чтобы увидеть фото до и после</p>
+          </Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {REVIEWS.map((r, i) => (
+              <Reveal key={r.name} delay={i * 80}>
+                <div className="bg-card border border-border rounded-3xl overflow-hidden flex flex-col h-full">
+                  {/* Photo toggle */}
+                  <div className="relative aspect-[4/3] overflow-hidden cursor-pointer select-none" onClick={() => setActiveSlides(s => ({ ...s, [i]: s[i] === 'before' ? 'after' : 'before' }))}>
+                    <img
+                      src={activeSlides[i] === 'before' ? r.before : r.after}
+                      alt={activeSlides[i] === 'before' ? 'До чистки' : 'После чистки'}
+                      className="w-full h-full object-cover transition-opacity duration-300"
+                    />
+                    <div className="absolute inset-0 flex items-end p-3 gap-2">
+                      <button
+                        onClick={e => { e.stopPropagation(); setActiveSlides(s => ({ ...s, [i]: 'before' })); }}
+                        className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all ${activeSlides[i] === 'before' ? 'bg-white text-black shadow' : 'bg-black/40 text-white/80'}`}
+                      >До</button>
+                      <button
+                        onClick={e => { e.stopPropagation(); setActiveSlides(s => ({ ...s, [i]: 'after' })); }}
+                        className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all ${activeSlides[i] === 'after' ? 'bg-white text-black shadow' : 'bg-black/40 text-white/80'}`}
+                      >После</button>
+                    </div>
+                    <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">{r.item}</div>
+                  </div>
+                  {/* Review text */}
+                  <div className="p-5 flex flex-col flex-1">
+                    <div className="flex gap-0.5 mb-3">
+                      {Array.from({ length: r.rating }).map((_, j) => (
+                        <Icon key={j} name="Star" size={16} className="text-yellow-400 fill-yellow-400" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed flex-1">«{r.text}»</p>
+                    <div className="mt-4 pt-4 border-t border-border flex items-center gap-3">
+                      <div className="grid place-items-center w-9 h-9 rounded-full bg-primary/10 text-primary font-bold text-sm">
+                        {r.name[0]}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm">{r.name}</p>
+                        <p className="text-xs text-muted-foreground">{r.location}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </Reveal>
             ))}
