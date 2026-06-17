@@ -115,7 +115,9 @@ function BeforeAfterSlider({ before, after, item }: { before: string; after: str
   const onMouseDown = (e: React.MouseEvent) => { dragging.current = true; calcPos(e.clientX); };
   const onMouseMove = (e: React.MouseEvent) => { if (dragging.current) calcPos(e.clientX); };
   const onMouseUp = () => { dragging.current = false; };
-  const onTouchMove = (e: React.TouchEvent) => { calcPos(e.touches[0].clientX); };
+  const onTouchStart = () => { dragging.current = true; };
+  const onTouchMove = (e: React.TouchEvent) => { if (dragging.current) calcPos(e.touches[0].clientX); };
+  const onTouchEnd = () => { dragging.current = false; };
 
   return (
     <div
@@ -125,7 +127,9 @@ function BeforeAfterSlider({ before, after, item }: { before: string; after: str
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
       onMouseLeave={onMouseUp}
+      onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
     >
       <img src={after} alt="После чистки" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
