@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -100,6 +100,50 @@ const TELEGRAM = 'https://t.me/';
 const WHATSAPP = 'https://wa.me/';
 const PHONE = 'tel:+70000000000';
 
+function BeforeAfterSlider({ before, after, item }: { before: string; after: string; item: string }) {
+  const [pos, setPos] = useState(50);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+
+  const calcPos = useCallback((clientX: number) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = Math.max(0, Math.min(clientX - rect.left, rect.width));
+    setPos((x / rect.width) * 100);
+  }, []);
+
+  const onMouseDown = (e: React.MouseEvent) => { dragging.current = true; calcPos(e.clientX); };
+  const onMouseMove = (e: React.MouseEvent) => { if (dragging.current) calcPos(e.clientX); };
+  const onMouseUp = () => { dragging.current = false; };
+  const onTouchMove = (e: React.TouchEvent) => { calcPos(e.touches[0].clientX); };
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative aspect-[4/3] overflow-hidden select-none cursor-col-resize"
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onMouseLeave={onMouseUp}
+      onTouchMove={onTouchMove}
+    >
+      <img src={after} alt="После чистки" className="absolute inset-0 w-full h-full object-cover" />
+      <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
+        <img src={before} alt="До чистки" className="absolute inset-0 w-full h-full object-cover" style={{ width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '100%', maxWidth: 'none' }} />
+      </div>
+      <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: `calc(${pos}% - 1px)` }}>
+        <div className="w-0.5 h-full bg-white shadow-lg" />
+        <div className="absolute grid place-items-center w-9 h-9 rounded-full bg-white shadow-xl -translate-x-1/2 border-2 border-white">
+          <Icon name="ChevronsLeftRight" size={18} className="text-gray-700" />
+        </div>
+      </div>
+      <div className="absolute top-3 left-3 bg-black/50 text-white text-xs font-bold px-2.5 py-1 rounded-full pointer-events-none">До</div>
+      <div className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-full pointer-events-none">После</div>
+      <div className="absolute bottom-3 left-3 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full pointer-events-none">{item}</div>
+    </div>
+  );
+}
+
 function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -126,7 +170,7 @@ function Reveal({ children, className = '', delay = 0 }: { children: React.React
 
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeSlides, setActiveSlides] = useState<Record<number, 'before' | 'after'>>({ 0: 'before', 1: 'before', 2: 'before' });
+
 
   const scrollTo = (id: string) => {
     setMenuOpen(false);
@@ -340,31 +384,13 @@ const Index = () => {
         <div className="container px-4 md:px-8">
           <Reveal>
             <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-3">Отзывы клиентов</h2>
-            <p className="text-center text-muted-foreground mb-12">Реальные результаты — нажмите на карточку, чтобы увидеть фото до и после</p>
+            <p className="text-center text-muted-foreground mb-12">Реальные результаты — тяните ползунок, чтобы увидеть фото до и после</p>
           </Reveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {REVIEWS.map((r, i) => (
               <Reveal key={r.name} delay={i * 80}>
                 <div className="bg-card border border-border rounded-3xl overflow-hidden flex flex-col h-full">
-                  {/* Photo toggle */}
-                  <div className="relative aspect-[4/3] overflow-hidden cursor-pointer select-none" onClick={() => setActiveSlides(s => ({ ...s, [i]: s[i] === 'before' ? 'after' : 'before' }))}>
-                    <img
-                      src={activeSlides[i] === 'before' ? r.before : r.after}
-                      alt={activeSlides[i] === 'before' ? 'До чистки' : 'После чистки'}
-                      className="w-full h-full object-cover transition-opacity duration-300"
-                    />
-                    <div className="absolute inset-0 flex items-end p-3 gap-2">
-                      <button
-                        onClick={e => { e.stopPropagation(); setActiveSlides(s => ({ ...s, [i]: 'before' })); }}
-                        className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all ${activeSlides[i] === 'before' ? 'bg-white text-black shadow' : 'bg-black/40 text-white/80'}`}
-                      >До</button>
-                      <button
-                        onClick={e => { e.stopPropagation(); setActiveSlides(s => ({ ...s, [i]: 'after' })); }}
-                        className={`flex-1 py-1.5 rounded-full text-xs font-bold transition-all ${activeSlides[i] === 'after' ? 'bg-white text-black shadow' : 'bg-black/40 text-white/80'}`}
-                      >После</button>
-                    </div>
-                    <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full">{r.item}</div>
-                  </div>
+                  <BeforeAfterSlider before={r.before} after={r.after} item={r.item} />
                   {/* Review text */}
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex gap-0.5 mb-3">
