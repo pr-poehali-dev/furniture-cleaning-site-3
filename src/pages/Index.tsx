@@ -176,7 +176,7 @@ const Index = () => {
                 </div>
               </Reveal>
             </div>
-            <Reveal delay={180} className="hidden lg:block">
+            <Reveal delay={180} className="hidden md:block">
               <div className="relative">
                 <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/10 to-accent/10 scale-105" />
                 <img
