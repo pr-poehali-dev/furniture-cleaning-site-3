@@ -195,7 +195,7 @@ const Index = () => {
           </div>
           <Reveal delay={200}>
             <p className="mt-10 text-center text-lg md:text-xl font-semibold max-w-2xl mx-auto">
-              Мы решаем эти проблемы профессиональной <span className="text-primary">экстракторной чисткой</span>.
+              Мы решаем эти проблемы <span className="text-primary">экстракторной чисткой</span>.
             </p>
           </Reveal>
         </div>
