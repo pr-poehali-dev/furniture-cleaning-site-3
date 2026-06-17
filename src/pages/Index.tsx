@@ -112,24 +112,29 @@ function BeforeAfterSlider({ before, after, item }: { before: string; after: str
     setPos((x / rect.width) * 100);
   }, []);
 
-  const onMouseDown = () => { dragging.current = true; };
-  const onMouseMove = (e: React.MouseEvent) => { if (dragging.current) calcPos(e.clientX); };
-  const onMouseUp = () => { dragging.current = false; };
-  const onTouchStart = () => { dragging.current = true; };
-  const onTouchMove = (e: React.TouchEvent) => { if (dragging.current) calcPos(e.touches[0].clientX); };
-  const onTouchEnd = () => { dragging.current = false; };
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => { if (dragging.current) calcPos(e.clientX); };
+    const onMouseUp = () => { dragging.current = false; };
+    const onTouchMove = (e: TouchEvent) => { if (dragging.current) { e.preventDefault(); calcPos(e.touches[0].clientX); } };
+    const onTouchEnd = () => { dragging.current = false; };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchend', onTouchEnd);
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [calcPos]);
 
   return (
     <div
       ref={containerRef}
       className="relative aspect-[4/3] overflow-hidden select-none cursor-col-resize"
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onMouseLeave={onMouseUp}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
+      onMouseDown={() => { dragging.current = true; }}
+      onTouchStart={() => { dragging.current = true; }}
     >
       <img src={after} alt="После чистки" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
