@@ -397,10 +397,9 @@ const Index = () => {
           </Reveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {REVIEWS.map((r, i) => (
-              <Reveal key={r.name} delay={i * 80}>
-                <div className="bg-card border border-border rounded-3xl overflow-hidden flex flex-col h-full">
-                  <BeforeAfterSlider before={r.before} after={r.after} item={r.item} />
-                  {/* Review text */}
+              <div key={r.name} className="bg-card border border-border rounded-3xl overflow-hidden flex flex-col h-full">
+                <BeforeAfterSlider before={r.before} after={r.after} item={r.item} />
+                <Reveal delay={i * 80} className="flex flex-col flex-1">
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex gap-0.5 mb-3">
                       {Array.from({ length: r.rating }).map((_, j) => (
@@ -418,8 +417,8 @@ const Index = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-              </Reveal>
+                </Reveal>
+              </div>
             ))}
           </div>
         </div>
