@@ -133,8 +133,8 @@ function BeforeAfterSlider({ before, after, item }: { before: string; after: str
     <div
       ref={containerRef}
       className="relative aspect-[4/3] overflow-hidden select-none cursor-col-resize"
-      onMouseDown={() => { dragging.current = true; }}
-      onTouchStart={() => { dragging.current = true; }}
+      onMouseDown={(e) => { dragging.current = true; calcPos(e.clientX); }}
+      onTouchStart={(e) => { dragging.current = true; calcPos(e.touches[0].clientX); }}
     >
       <img src={after} alt="После чистки" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
