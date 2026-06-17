@@ -107,12 +107,11 @@ const Index = () => {
       {/* Header */}
       <header className="fixed top-0 inset-x-0 z-40 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="container flex items-center justify-between h-16 px-4 md:px-8">
-          <button onClick={() => scrollTo('hero')} className="flex items-center gap-2">
-            <img
-              src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/a3ee2e46-a85b-4de0-abc9-823319a59ec7.png"
-              alt="Чистер"
-              className="h-10 w-auto object-contain"
-            />
+          <button onClick={() => scrollTo('hero')} className="flex items-center gap-2 font-display font-extrabold text-xl">
+            <span className="grid place-items-center w-9 h-9 rounded-xl bg-primary text-primary-foreground">
+              <Icon name="Droplets" size={18} />
+            </span>
+            Чистер
           </button>
           <nav className="hidden md:flex items-center gap-6">
             {NAV.map((n) => (
@@ -376,12 +375,11 @@ const Index = () => {
       {/* Footer */}
       <footer className="py-10 border-t border-border">
         <div className="container px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-muted-foreground text-sm">
-          <div className="flex items-center gap-2">
-            <img
-              src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/a3ee2e46-a85b-4de0-abc9-823319a59ec7.png"
-              alt="Чистер"
-              className="h-9 w-auto object-contain"
-            />
+          <div className="flex items-center gap-2 font-display font-extrabold text-lg text-foreground">
+            <span className="grid place-items-center w-8 h-8 rounded-lg bg-primary text-primary-foreground">
+              <Icon name="Droplets" size={16} />
+            </span>
+            Чистер
           </div>
           <p>Выездная химчистка мебели · Москва и область</p>
           <p>© {new Date().getFullYear()} Чистер</p>
