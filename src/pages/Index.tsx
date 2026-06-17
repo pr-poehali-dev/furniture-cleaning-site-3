@@ -15,6 +15,7 @@ const NAV = [
   { id: 'services', label: 'Услуги' },
   { id: 'packages', label: 'Пакеты' },
   { id: 'price', label: 'Прайс' },
+  { id: 'calculator', label: 'Калькулятор' },
   { id: 'process', label: 'Процесс' },
   { id: 'faq', label: 'FAQ' },
   { id: 'contacts', label: 'Контакты' },
@@ -96,6 +97,15 @@ const REVIEWS = [
   },
 ];
 
+const CALC_ITEMS = [
+  { id: 'sofa_straight', icon: 'Sofa',      label: 'Прямой диван',   price: 3500 },
+  { id: 'sofa_corner',  icon: 'Sofa',       label: 'Угловой диван',  price: 4500 },
+  { id: 'mattress',     icon: 'BedDouble',  label: 'Матрас',         price: 2500 },
+  { id: 'armchair',     icon: 'Armchair',   label: 'Кресло',         price: 1000 },
+  { id: 'chair',        icon: 'Chair',      label: 'Стул',           price: 250  },
+  { id: 'odor',         icon: 'Wind',       label: 'Удаление запаха',price: 1500 },
+];
+
 const TELEGRAM = 'https://t.me/';
 const WHATSAPP = 'https://wa.me/';
 const PHONE = 'tel:+70000000000';
@@ -149,6 +159,76 @@ function BeforeAfterSlider({ before, after, item }: { before: string; after: str
       <div className="absolute top-3 left-3 bg-black/50 text-white text-xs font-bold px-2.5 py-1 rounded-full pointer-events-none">До</div>
       <div className="absolute top-3 right-3 bg-primary text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-full pointer-events-none">После</div>
       <div className="absolute bottom-3 left-3 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full pointer-events-none">{item}</div>
+    </div>
+  );
+}
+
+function PriceCalculator() {
+  const [counts, setCounts] = useState<Record<string, number>>(
+    Object.fromEntries(CALC_ITEMS.map((i) => [i.id, 0]))
+  );
+
+  const change = (id: string, delta: number) => {
+    setCounts((prev) => ({ ...prev, [id]: Math.max(0, (prev[id] ?? 0) + delta) }));
+  };
+
+  const total = CALC_ITEMS.reduce((sum, item) => sum + item.price * counts[item.id], 0);
+  const hasItems = total > 0;
+
+  const waText = CALC_ITEMS
+    .filter((i) => counts[i.id] > 0)
+    .map((i) => `${i.label} × ${counts[i.id]}`)
+    .join(', ');
+  const waLink = `${WHATSAPP}?text=${encodeURIComponent(`Хочу рассчитать химчистку: ${waText}. Итого от ${total.toLocaleString('ru-RU')} ₽`)}`;
+
+  return (
+    <div className="bg-card border border-border rounded-3xl p-6 md:p-8 max-w-2xl mx-auto shadow-sm">
+      <div className="space-y-3 mb-6">
+        {CALC_ITEMS.map((item) => (
+          <div key={item.id} className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="grid place-items-center w-9 h-9 rounded-xl bg-secondary text-primary flex-shrink-0">
+                <Icon name={item.icon} size={18} fallback="Sofa" />
+              </span>
+              <span className="font-medium truncate">{item.label}</span>
+              <span className="text-muted-foreground text-sm whitespace-nowrap hidden sm:block">
+                от {item.price.toLocaleString('ru-RU')} ₽
+              </span>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => change(item.id, -1)}
+                disabled={counts[item.id] === 0}
+                className="w-8 h-8 rounded-full border border-border flex items-center justify-center text-lg font-bold disabled:opacity-30 hover:bg-secondary transition-colors"
+              >−</button>
+              <span className="w-5 text-center font-bold text-lg tabular-nums">{counts[item.id]}</span>
+              <button
+                onClick={() => change(item.id, 1)}
+                className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-bold hover:bg-primary/90 transition-colors"
+              >+</button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="border-t border-border pt-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          {hasItems ? (
+            <>
+              <p className="text-sm text-muted-foreground">Итого от</p>
+              <p className="font-display font-black text-3xl text-primary">{total.toLocaleString('ru-RU')} ₽</p>
+            </>
+          ) : (
+            <p className="text-muted-foreground text-sm">Выберите мебель для расчёта</p>
+          )}
+        </div>
+        <a href={hasItems ? waLink : WHATSAPP} target="_blank" rel="noreferrer" className="w-full sm:w-auto">
+          <Button size="lg" disabled={!hasItems} className="rounded-full font-semibold h-12 px-7 w-full bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-40">
+            <Icon name="MessageCircle" size={18} className="mr-2" />
+            {hasItems ? 'Заказать в WhatsApp' : 'Выберите позиции'}
+          </Button>
+        </a>
+      </div>
     </div>
   );
 }
@@ -366,8 +446,21 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Calculator */}
+      <section id="calculator" className="py-16 md:py-24 bg-secondary/40">
+        <div className="container px-4 md:px-8">
+          <Reveal>
+            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-3">Рассчитайте стоимость</h2>
+            <p className="text-center text-muted-foreground mb-10">Выберите мебель — и узнайте цену прямо сейчас</p>
+          </Reveal>
+          <Reveal delay={80}>
+            <PriceCalculator />
+          </Reveal>
+        </div>
+      </section>
+
       {/* Process */}
-      <section id="process" className="py-16 md:py-24 bg-secondary/40">
+      <section id="process" className="py-16 md:py-24">
         <div className="container px-4 md:px-8">
           <Reveal>
             <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-14">Как проходит работа</h2>
