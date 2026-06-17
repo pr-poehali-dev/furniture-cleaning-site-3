@@ -112,7 +112,7 @@ function BeforeAfterSlider({ before, after, item }: { before: string; after: str
     setPos((x / rect.width) * 100);
   }, []);
 
-  const onMouseDown = (e: React.MouseEvent) => { dragging.current = true; calcPos(e.clientX); };
+  const onMouseDown = () => { dragging.current = true; };
   const onMouseMove = (e: React.MouseEvent) => { if (dragging.current) calcPos(e.clientX); };
   const onMouseUp = () => { dragging.current = false; };
   const onTouchStart = () => { dragging.current = true; };
