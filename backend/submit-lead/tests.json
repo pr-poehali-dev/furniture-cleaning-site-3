@@ -1,0 +1,13 @@
+{
+  "tests": [
+    {
+      "name": "Submit lead form",
+      "method": "POST",
+      "path": "/",
+      "body": {"name": "Test", "phone": "+79001234567", "comment": "sofa", "source": "form"},
+      "expectedStatus": 200,
+      "expectedBody": {},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
