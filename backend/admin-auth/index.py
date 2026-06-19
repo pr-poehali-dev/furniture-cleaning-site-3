@@ -8,7 +8,7 @@ CORS = {
 }
 
 def handler(event: dict, context) -> dict:
-    """Проверяет пароль администратора и возвращает токен сессии."""
+    """Проверяет пароль администратора и возвращает токен сессии. v2"""
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
 

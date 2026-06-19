@@ -14,7 +14,7 @@ def check_auth(event: dict) -> bool:
     return token == os.environ.get('ADMIN_PASSWORD', '')
 
 def handler(event: dict, context) -> dict:
-    """Возвращает список заявок для панели администратора. Требует заголовок X-Admin-Token."""
+    """Возвращает список заявок для панели администратора. Требует заголовок X-Admin-Token. v2"""
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'body': ''}
 
