@@ -10,7 +10,8 @@ CORS = {
 }
 
 def check_auth(event: dict) -> bool:
-    token = event.get('headers', {}).get('x-admin-token', '')
+    params = event.get('queryStringParameters') or {}
+    token = params.get('token', '') or event.get('headers', {}).get('x-admin-token', '')
     return token == os.environ.get('ADMIN_PASSWORD', '')
 
 def handler(event: dict, context) -> dict:

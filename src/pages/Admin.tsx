@@ -56,7 +56,7 @@ export default function Admin() {
   const fetchLeads = useCallback(async (t: string) => {
     setLeadsLoading(true);
     try {
-      const res = await fetch(LEADS_URL, { headers: { 'x-admin-token': t } });
+      const res = await fetch(`${LEADS_URL}?token=${encodeURIComponent(t)}`);
       if (res.status === 401) { setToken(''); localStorage.removeItem('admin_token'); return; }
       const data = await res.json();
       setLeads(data.leads || []);
@@ -92,9 +92,9 @@ export default function Admin() {
   };
 
   const updateStatus = async (id: number, status: string) => {
-    await fetch(LEADS_URL, {
+    await fetch(`${LEADS_URL}?token=${encodeURIComponent(token)}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-admin-token': token },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     });
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, status } : l)));
