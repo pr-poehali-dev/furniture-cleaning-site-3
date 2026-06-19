@@ -82,8 +82,8 @@ const REVIEWS = [
     location: 'Москва, Реутов',
     text: 'Кресло было с жирными пятнами — думал уже выбрасывать. Ребята почистили за час, пятна ушли полностью. Цена совпала с тем, что назвали по телефону — без сюрпризов.',
     rating: 5,
-    before: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/7caab006-a9e3-41b0-a41c-578d1eda0f09.jpg',
-    after: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/6bac44ef-4bb3-4711-a90d-dd7a6d211feb.jpg',
+    before: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/7f810fd7-c198-404c-8b18-e8620fa39e1d.jpg',
+    after: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/80293506-5104-441e-895e-21af4954c180.jpg',
     item: 'Кресло',
   },
   {
