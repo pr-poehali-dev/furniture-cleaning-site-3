@@ -73,9 +73,9 @@ const REVIEWS = [
     location: 'Москва, Митино',
     text: 'Диван после кота был в ужасном состоянии — пятна, запах. После химчистки выглядит как новый! Мастер приехал вовремя, всё сделал аккуратно. Однозначно рекомендую.',
     rating: 5,
-    before: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/6910d211-aea5-4e1a-8ecf-2d9e54b597b9.jpg',
-    after: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/a9c4367d-8747-4a70-a6f2-20814ce24893.jpg',
-    item: 'Диван',
+    before: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/491d5513-ae1f-4149-825e-c891b67cc2d8.jpg',
+    after: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/59f75b22-953b-4c35-9673-daf9fab579e8.png',
+    item: 'Матрас',
   },
   {
     name: 'Антон К.',
