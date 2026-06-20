@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
 
 const SERVICES_URL = 'https://functions.poehali.dev/69cf7aba-5592-425b-b604-218abbaf0e1d';
@@ -163,6 +164,7 @@ export default function PriceCalculator() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [userComment, setUserComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const topRef = useRef<HTMLDivElement>(null);
@@ -248,7 +250,10 @@ export default function PriceCalculator() {
           name, phone, address,
           furniture: furnitureList,
           appointed_at: appointedAt,
-          comment: `Итого: ${totalSum > 0 ? totalSum.toLocaleString('ru-RU') + ' ₽' : 'по прайсу'}`,
+          comment: [
+            `Итого: ${totalSum > 0 ? totalSum.toLocaleString('ru-RU') + ' ₽' : 'по прайсу'}`,
+            userComment.trim() ? `Комментарий: ${userComment.trim()}` : '',
+          ].filter(Boolean).join('\n'),
           source: 'calculator',
         }),
       });
@@ -265,7 +270,7 @@ export default function PriceCalculator() {
     setSofaStraightSize(''); setSofaCornerSize(''); setMattressSize(''); setCounts({});
     setTotalItems([]); setTotalSum(0);
     setBookingDate(null); setBookingTime('');
-    setName(''); setPhone(''); setAddress('');
+    setName(''); setPhone(''); setAddress(''); setUserComment('');
     scrollTop();
   };
 
@@ -530,6 +535,13 @@ export default function PriceCalculator() {
               value={address}
               onChange={e => setAddress(e.target.value)}
               className="rounded-xl h-12"
+            />
+            <Textarea
+              placeholder="Дополнительный комментарий (необязательно) — опишите загрязнения, материал мебели, особые пожелания"
+              value={userComment}
+              onChange={e => setUserComment(e.target.value)}
+              className="rounded-xl resize-none min-h-[90px]"
+              rows={3}
             />
           </div>
           <div className="flex gap-3">
