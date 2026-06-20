@@ -15,8 +15,7 @@ const NAV = [
   { id: 'hero', label: 'Главная' },
   { id: 'services', label: 'Услуги' },
   { id: 'packages', label: 'Пакеты' },
-  { id: 'price', label: 'Прайс' },
-  { id: 'calculator', label: 'Подбор' },
+  { id: 'calculator', label: 'Калькулятор' },
   { id: 'process', label: 'Процесс' },
   { id: 'faq', label: 'FAQ' },
   { id: 'contacts', label: 'Контакты' },
@@ -492,30 +491,6 @@ const Index = () => {
                   >
                     Выбрать
                   </Button>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Price */}
-      <section id="price" className="py-16 md:py-24">
-        <div className="container px-4 md:px-8 max-w-3xl">
-          <Reveal>
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-12">Прайс</h2>
-          </Reveal>
-          <div className="space-y-3">
-            {(services.length > 0 ? services : PRICE).map((p, i) => (
-              <Reveal key={p.name} delay={i * 60}>
-                <div className="flex items-center justify-between bg-card border border-border rounded-2xl px-6 py-4 hover:border-primary/40 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <span className="grid place-items-center w-10 h-10 rounded-xl bg-secondary text-primary">
-                      <Icon name={'icon' in p ? p.icon : 'Sparkles'} size={20} fallback="Sofa" />
-                    </span>
-                    <span className="font-medium text-lg">{p.name}</span>
-                  </div>
-                  <span className="font-display font-bold text-lg text-primary whitespace-nowrap">{p.price}</span>
                 </div>
               </Reveal>
             ))}
