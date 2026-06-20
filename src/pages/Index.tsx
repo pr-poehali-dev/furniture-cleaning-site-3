@@ -164,6 +164,7 @@ function BeforeAfterSlider({ before, after, item }: { before: string; after: str
 }
 
 const SUBMIT_LEAD_URL = 'https://functions.poehali.dev/f8b7c153-8fc2-4042-9674-36ccc1e91425';
+const SERVICES_URL = 'https://functions.poehali.dev/69cf7aba-5592-425b-b604-218abbaf0e1d';
 
 function ContactForm() {
   const [name, setName] = useState('');
@@ -322,8 +323,18 @@ function Reveal({ children, className = '', delay = 0 }: { children: React.React
   );
 }
 
+interface Service { id: number; name: string; price: string; }
+
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [services, setServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    fetch(`${SERVICES_URL}?scope=services`)
+      .then((r) => r.json())
+      .then((d) => { if (d.services?.length) setServices(d.services); })
+      .catch(() => {});
+  }, []);
 
 
   const scrollTo = (id: string) => {
@@ -494,12 +505,12 @@ const Index = () => {
             <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-12">Прайс</h2>
           </Reveal>
           <div className="space-y-3">
-            {PRICE.map((p, i) => (
+            {(services.length > 0 ? services : PRICE).map((p, i) => (
               <Reveal key={p.name} delay={i * 60}>
                 <div className="flex items-center justify-between bg-card border border-border rounded-2xl px-6 py-4 hover:border-primary/40 transition-colors">
                   <div className="flex items-center gap-4">
                     <span className="grid place-items-center w-10 h-10 rounded-xl bg-secondary text-primary">
-                      <Icon name={p.icon} size={20} fallback="Sofa" />
+                      <Icon name={'icon' in p ? p.icon : 'Sparkles'} size={20} fallback="Sofa" />
                     </span>
                     <span className="font-medium text-lg">{p.name}</span>
                   </div>
