@@ -126,6 +126,7 @@ export default function PriceCalculator() {
   const [sofaStraightSize, setSofaStraightSize] = useState('');
   const [sofaCornerSize, setSofaCornerSize] = useState('');
   const [mattressSize, setMattressSize] = useState('');
+  const [chairCount, setChairCount] = useState(1);
   // Шаг 3 — цена
   const [totalItems, setTotalItems] = useState<{ label: string; price: string }[]>([]);
   const [totalSum, setTotalSum] = useState(0);
@@ -152,7 +153,8 @@ export default function PriceCalculator() {
   const needsStraightDetail = selected.has('sofa_straight');
   const needsCornerDetail = selected.has('sofa_corner');
   const needsMattressDetail = selected.has('mattress');
-  const needsDetails = needsStraightDetail || needsCornerDetail || needsMattressDetail;
+  const needsChairDetail = selected.has('chair');
+  const needsDetails = needsStraightDetail || needsCornerDetail || needsMattressDetail || needsChairDetail;
 
   const detailsReady = (
     (!needsStraightDetail || sofaStraightSize) &&
@@ -181,7 +183,12 @@ export default function PriceCalculator() {
       addItem(MATTRESS_SIZES[mattressSize], MATTRESS_SIZES[mattressSize]);
     }
     if (selected.has('armchair')) addItem('Кресло', 'Кресло');
-    if (selected.has('chair')) addItem('Стул с мягкой обивкой', 'Стул с мягкой обивкой');
+    if (selected.has('chair')) {
+      const priceStr = findPrice(services, 'Стул с мягкой обивкой');
+      const num = parsePrice(priceStr);
+      items.push({ label: `Стул с мягкой обивкой × ${chairCount}`, price: formatPrice(String(num * chairCount)) });
+      sum += num * chairCount;
+    }
     if (selected.has('odor')) addItem('Удаление запахов', 'Удаление запахов');
 
     setTotalItems(items);
@@ -219,7 +226,7 @@ export default function PriceCalculator() {
   const reset = () => {
     setStep('furniture');
     setSelected(new Set());
-    setSofaStraightSize(''); setSofaCornerSize(''); setMattressSize('');
+    setSofaStraightSize(''); setSofaCornerSize(''); setMattressSize(''); setChairCount(1);
     setTotalItems([]); setTotalSum(0);
     setBookingDate(null); setBookingTime('');
     setName(''); setPhone(''); setAddress('');
@@ -345,6 +352,23 @@ export default function PriceCalculator() {
                       }`}
                     >{s}</button>
                   ))}
+                </div>
+              </div>
+            )}
+            {needsChairDetail && (
+              <div>
+                <p className="font-semibold mb-2 text-sm">Количество стульев</p>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setChairCount(c => Math.max(1, c - 1))}
+                    className="w-11 h-11 rounded-xl border-2 border-border hover:border-primary/40 font-bold text-lg transition-all flex items-center justify-center"
+                  >−</button>
+                  <span className="font-bold text-2xl w-8 text-center">{chairCount}</span>
+                  <button
+                    onClick={() => setChairCount(c => Math.min(20, c + 1))}
+                    className="w-11 h-11 rounded-xl border-2 border-border hover:border-primary/40 font-bold text-lg transition-all flex items-center justify-center"
+                  >+</button>
+                  <span className="text-sm text-muted-foreground">шт.</span>
                 </div>
               </div>
             )}
