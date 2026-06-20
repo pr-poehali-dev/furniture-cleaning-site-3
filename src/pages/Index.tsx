@@ -17,6 +17,7 @@ const NAV = [
   { id: 'packages', label: 'Пакеты' },
   { id: 'calculator', label: 'Калькулятор' },
   { id: 'process', label: 'Процесс' },
+  { id: 'reviews', label: 'Отзывы' },
   { id: 'faq', label: 'FAQ' },
   { id: 'contacts', label: 'Контакты' },
 ];
