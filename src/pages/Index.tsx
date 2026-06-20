@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import PriceCalculator from '@/components/PriceCalculator';
 import {
   Accordion,
@@ -167,73 +165,7 @@ function BeforeAfterSlider({ before, after, item }: { before: string; after: str
 const SUBMIT_LEAD_URL = 'https://functions.poehali.dev/f8b7c153-8fc2-4042-9674-36ccc1e91425';
 const SERVICES_URL = 'https://functions.poehali.dev/69cf7aba-5592-425b-b604-218abbaf0e1d';
 
-function ContactForm() {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [comment, setComment] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!phone.trim()) return;
-    setLoading(true);
-    try {
-      await fetch(SUBMIT_LEAD_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, comment, source: 'form' }),
-      });
-      setDone(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (done) {
-    return (
-      <div className="bg-card text-card-foreground rounded-3xl p-7 md:p-9 shadow-2xl flex flex-col items-center justify-center gap-4 min-h-[260px]">
-        <span className="grid place-items-center w-16 h-16 rounded-full bg-primary/10 text-primary">
-          <Icon name="CheckCircle2" size={36} />
-        </span>
-        <h3 className="font-display font-bold text-2xl text-center">Заявка принята!</h3>
-        <p className="text-muted-foreground text-center">Мы перезвоним вам в ближайшее время</p>
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="bg-card text-card-foreground rounded-3xl p-7 md:p-9 shadow-2xl">
-      <h3 className="font-display font-bold text-2xl mb-1">Оставьте заявку</h3>
-      <p className="text-muted-foreground mb-6">Перезвоним и рассчитаем стоимость</p>
-      <div className="space-y-4">
-        <Input
-          placeholder="Ваше имя"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="h-13 rounded-xl bg-secondary/50 border-border"
-        />
-        <Input
-          placeholder="Телефон *"
-          type="tel"
-          required
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="h-13 rounded-xl bg-secondary/50 border-border"
-        />
-        <Textarea
-          placeholder="Комментарий (что нужно почистить)"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          className="rounded-xl bg-secondary/50 border-border min-h-[110px]"
-        />
-        <Button type="submit" disabled={loading} className="w-full rounded-full font-semibold h-13 text-base">
-          {loading ? 'Отправляем...' : 'Получить расчёт'}
-        </Button>
-      </div>
-    </form>
-  );
-}
 
 function FurniturePicker() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -649,34 +581,29 @@ const Index = () => {
 
       {/* Contacts / Final */}
       <section id="contacts" className="py-16 md:py-24 bg-primary text-primary-foreground grain">
-        <div className="container px-4 md:px-8 grid lg:grid-cols-2 gap-12 items-center">
+        <div className="container px-4 md:px-8 max-w-2xl mx-auto text-center">
           <Reveal>
-            <div>
-              <h2 className="font-display font-black text-3xl md:text-5xl leading-tight">Узнайте стоимость за 5 минут</h2>
-              <p className="mt-5 text-lg text-primary-foreground/85 max-w-md">
-                Отправьте фото мебели в WhatsApp или Telegram и получите точный расчёт без выезда.
-              </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <a href={WHATSAPP} target="_blank" rel="noreferrer">
-                  <Button size="lg" className="rounded-full font-semibold h-14 px-7 w-full bg-accent text-accent-foreground hover:bg-accent/90">
-                    <Icon name="MessageCircle" size={20} className="mr-2" /> WhatsApp
-                  </Button>
-                </a>
-                <a href={TELEGRAM} target="_blank" rel="noreferrer">
-                  <Button size="lg" variant="secondary" className="rounded-full font-semibold h-14 px-7 w-full">
-                    <Icon name="Send" size={20} className="mr-2" /> Telegram
-                  </Button>
-                </a>
-                <a href={PHONE}>
-                  <Button size="lg" variant="outline" className="rounded-full font-semibold h-14 px-7 w-full border-2 border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10">
-                    <Icon name="Phone" size={20} className="mr-2" /> Позвонить
-                  </Button>
-                </a>
-              </div>
+            <h2 className="font-display font-black text-3xl md:text-5xl leading-tight">Есть вопросы?<br />Свяжитесь с нами</h2>
+            <p className="mt-5 text-lg text-primary-foreground/85">
+              Ответим на любые вопросы, поможем подобрать услугу и согласуем удобное время
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+              <a href={WHATSAPP} target="_blank" rel="noreferrer">
+                <Button size="lg" className="rounded-full font-semibold h-14 px-7 w-full bg-accent text-accent-foreground hover:bg-accent/90">
+                  <Icon name="MessageCircle" size={20} className="mr-2" /> WhatsApp
+                </Button>
+              </a>
+              <a href={TELEGRAM} target="_blank" rel="noreferrer">
+                <Button size="lg" variant="secondary" className="rounded-full font-semibold h-14 px-7 w-full">
+                  <Icon name="Send" size={20} className="mr-2" /> Telegram
+                </Button>
+              </a>
+              <a href={PHONE}>
+                <Button size="lg" variant="outline" className="rounded-full font-semibold h-14 px-7 w-full border-2 border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10">
+                  <Icon name="Phone" size={20} className="mr-2" /> Позвонить
+                </Button>
+              </a>
             </div>
-          </Reveal>
-          <Reveal delay={120}>
-            <ContactForm />
           </Reveal>
         </div>
       </section>
