@@ -403,7 +403,7 @@ const Index = () => {
           </Reveal>
           <Reveal delay={240}>
             <div className="mt-9 flex flex-col sm:flex-row gap-3">
-              <Button onClick={() => scrollTo('contacts')} size="lg" className="rounded-full text-base font-semibold h-14 px-8">
+              <Button onClick={() => scrollTo('calculator')} size="lg" className="rounded-full text-base font-semibold h-14 px-8">
                 <Icon name="Calculator" size={20} className="mr-2" /> Рассчитать стоимость
               </Button>
               <a href={TELEGRAM} target="_blank" rel="noreferrer">
