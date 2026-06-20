@@ -13,9 +13,9 @@ const NAV = [
   { id: 'hero', label: 'Главная' },
   { id: 'services', label: 'Услуги' },
   { id: 'packages', label: 'Пакеты' },
+  { id: 'reviews', label: 'Отзывы' },
   { id: 'calculator', label: 'Калькулятор' },
   { id: 'process', label: 'Процесс' },
-  { id: 'reviews', label: 'Отзывы' },
   { id: 'faq', label: 'FAQ' },
   { id: 'contacts', label: 'Контакты' },
 ];
@@ -485,41 +485,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Calculator */}
-      <section id="calculator" className="py-16 md:py-24 bg-secondary/40">
-        <div className="container px-4 md:px-8">
-          <Reveal>
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-3">Расчёт точной стоимости</h2>
-            <p className="text-center text-muted-foreground mb-10">Ответьте на несколько вопросов — узнайте цену за 30 секунд</p>
-          </Reveal>
-          <Reveal delay={80}>
-            <PriceCalculator />
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Process */}
-      <section id="process" className="py-16 md:py-24">
-        <div className="container px-4 md:px-8">
-          <Reveal>
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-14">Как проходит работа</h2>
-          </Reveal>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
-            {STEPS.map((s, i) => (
-              <Reveal key={s.title} delay={i * 80}>
-                <div className="h-full bg-card rounded-3xl p-7 border border-border relative">
-                  <span className="font-display font-black text-5xl text-primary/15 absolute top-4 right-5">{i + 1}</span>
-                  <div className="grid place-items-center w-12 h-12 rounded-2xl bg-primary text-primary-foreground mb-4">
-                    <Icon name={s.icon} size={24} />
-                  </div>
-                  <p className="font-semibold text-lg leading-snug pr-8">{s.title}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Reviews */}
       <section id="reviews" className="py-16 md:py-24">
         <div className="container px-4 md:px-8">
@@ -551,6 +516,41 @@ const Index = () => {
                   </div>
                 </Reveal>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Calculator */}
+      <section id="calculator" className="py-16 md:py-24 bg-secondary/40">
+        <div className="container px-4 md:px-8">
+          <Reveal>
+            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-3">Расчёт точной стоимости</h2>
+            <p className="text-center text-muted-foreground mb-10">Ответьте на несколько вопросов — узнайте цену за 30 секунд</p>
+          </Reveal>
+          <Reveal delay={80}>
+            <PriceCalculator />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Process */}
+      <section id="process" className="py-16 md:py-24">
+        <div className="container px-4 md:px-8">
+          <Reveal>
+            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-14">Как проходит работа</h2>
+          </Reveal>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
+            {STEPS.map((s, i) => (
+              <Reveal key={s.title} delay={i * 80}>
+                <div className="h-full bg-card rounded-3xl p-7 border border-border relative">
+                  <span className="font-display font-black text-5xl text-primary/15 absolute top-4 right-5">{i + 1}</span>
+                  <div className="grid place-items-center w-12 h-12 rounded-2xl bg-primary text-primary-foreground mb-4">
+                    <Icon name={s.icon} size={24} />
+                  </div>
+                  <p className="font-semibold text-lg leading-snug pr-8">{s.title}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
