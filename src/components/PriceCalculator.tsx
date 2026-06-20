@@ -182,11 +182,6 @@ export default function PriceCalculator() {
     setTotalSum(sum);
     setStep('price');
     scrollTop();
-
-    setTimeout(() => {
-      setStep('booking');
-      scrollTop();
-    }, 2000);
   };
 
   const handleSubmit = async () => {
@@ -359,30 +354,40 @@ export default function PriceCalculator() {
         </div>
       )}
 
-      {/* ШАГ 3 — показ цены (2 сек) */}
+      {/* ШАГ 3 — показ цены */}
       {step === 'price' && (
-        <div className="text-center py-4">
-          <div className="grid place-items-center w-16 h-16 rounded-full bg-primary/10 text-primary mx-auto mb-4">
-            <Icon name="Calculator" size={32} />
+        <div>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="grid place-items-center w-12 h-12 rounded-xl bg-primary/10 text-primary flex-shrink-0">
+              <Icon name="Calculator" size={24} />
+            </div>
+            <div>
+              <h3 className="font-bold text-xl leading-tight">Ваша стоимость</h3>
+              <p className="text-sm text-muted-foreground">Цена фиксируется до выезда специалиста</p>
+            </div>
           </div>
-          <h3 className="font-bold text-xl mb-4">Ваша стоимость</h3>
-          <div className="space-y-2 mb-5 text-left">
+          <div className="space-y-2 mb-4">
             {totalItems.map((item, i) => (
-              <div key={i} className="flex justify-between items-center bg-secondary/50 rounded-xl px-4 py-2.5">
+              <div key={i} className="flex justify-between items-center bg-secondary/50 rounded-xl px-4 py-3">
                 <span className="text-sm font-medium">{item.label}</span>
-                <span className="font-bold text-primary">{item.price}</span>
+                <span className="font-bold text-primary">{item.price || '—'}</span>
               </div>
             ))}
           </div>
-          {totalSum > 0 && (
-            <div className="flex justify-between items-center bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 mb-4">
-              <span className="font-semibold">Итого</span>
-              <span className="font-bold text-2xl text-primary">{totalSum.toLocaleString('ru-RU')} ₽</span>
-            </div>
-          )}
-          <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-            <Icon name="Loader2" size={14} className="animate-spin" /> Подбираем удобное время...
-          </p>
+          <div className="flex justify-between items-center bg-primary/5 border border-primary/20 rounded-xl px-4 py-3.5 mb-6">
+            <span className="font-semibold">Итого</span>
+            <span className="font-bold text-2xl text-primary">
+              {totalSum > 0 ? `${totalSum.toLocaleString('ru-RU')} ₽` : 'по прайсу'}
+            </span>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => setStep(needsDetails ? 'details' : 'furniture')} className="rounded-xl h-12 px-5">
+              <Icon name="ArrowLeft" size={16} />
+            </Button>
+            <Button onClick={() => { setStep('booking'); scrollTop(); }} className="flex-1 rounded-xl h-12 font-semibold">
+              <Icon name="CalendarDays" size={16} className="mr-2" /> Записаться на удобное время
+            </Button>
+          </div>
         </div>
       )}
 
@@ -417,7 +422,7 @@ export default function PriceCalculator() {
             </div>
           )}
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setStep('furniture')} className="rounded-xl h-12 px-5">
+            <Button variant="outline" onClick={() => setStep('price')} className="rounded-xl h-12 px-5">
               <Icon name="ArrowLeft" size={16} />
             </Button>
             <Button
