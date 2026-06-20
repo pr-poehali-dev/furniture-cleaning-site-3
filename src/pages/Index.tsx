@@ -398,7 +398,7 @@ const Index = () => {
           </Reveal>
           <Reveal delay={160}>
             <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl">
-              Фиксируем цену до выезда специалиста, рассчитайте точную стоимость на сайте за 30 секунд
+              Фиксируем стоимость до выезда специалиста<br />Рассчитайте стоимость на сайте за 30 секунд
             </p>
           </Reveal>
           <Reveal delay={240}>
