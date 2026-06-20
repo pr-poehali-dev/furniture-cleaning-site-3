@@ -181,7 +181,7 @@ export default function PriceCalculator() {
       addItem(MATTRESS_SIZES[mattressSize], MATTRESS_SIZES[mattressSize]);
     }
     if (selected.has('armchair')) addItem('Кресло', 'Кресло');
-    if (selected.has('chair')) addItem('Стул я мягкой обивкой', 'Стул я мягкой обивкой');
+    if (selected.has('chair')) addItem('Стул с мягкой обивкой', 'Стул с мягкой обивкой');
     if (selected.has('odor')) addItem('Удаление запахов', 'Удаление запахов');
 
     setTotalItems(items);

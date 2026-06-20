@@ -1,0 +1,1 @@
+UPDATE services SET name = 'Стул с мягкой обивкой' WHERE name = 'Стул я мягкой обивкой';
