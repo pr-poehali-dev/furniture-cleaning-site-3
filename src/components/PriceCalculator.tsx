@@ -17,32 +17,38 @@ const FURNITURE_ITEMS = [
   { id: 'odor',         label: 'Удаление запахов', icon: 'Wind' },
 ];
 
+// Точные названия из БД — должны совпадать с тем, что введено в панели «Услуги и цены»
 const SOFA_STRAIGHT_SIZES: Record<string, string> = {
-  '2-местный': 'Прямой диван 2-местный',
-  '3-местный': 'Прямой диван 3-местный',
+  '2-местный': 'Диван прямой двухместный',
+  '3-местный': 'Диван прямой трехместный',
 };
 
 const SOFA_CORNER_SIZES: Record<string, string> = {
-  'до 4 мест': 'Угловой диван до 4 мест',
-  'до 6 мест': 'Угловой диван до 6 мест',
+  'до 4 мест': 'Диван угловой (до 4 мест)',
+  'до 6 мест': 'Диван угловой (до 5-6 мест)',
 };
 
 const MATTRESS_SIZES: Record<string, string> = {
-  'Одноместный': 'Матрас одноместный',
-  'Двухместный': 'Матрас двухместный',
+  'Одноместный': 'Матрас односпальный',
+  'Двухместный': 'Матрас двуспальный',
   'King Size': 'Матрас King Size',
 };
 
-function findPrice(services: Service[], query: string): string {
-  const lower = query.toLowerCase();
-  const found = services.find((s) => s.name.toLowerCase().includes(lower));
+function findPrice(services: Service[], exactName: string): string {
+  const lower = exactName.toLowerCase();
+  const found = services.find((s) => s.name.toLowerCase() === lower);
   return found ? found.price : '';
 }
 
 function parsePrice(priceStr: string): number {
-  const m = priceStr.match(/\d[\d\s]*/);
+  const m = priceStr.match(/\d+/);
   if (!m) return 0;
-  return parseInt(m[0].replace(/\s/g, ''), 10);
+  return parseInt(m[0], 10);
+}
+
+function formatPrice(priceStr: string): string {
+  const num = parsePrice(priceStr);
+  return num > 0 ? `${num.toLocaleString('ru-RU')} ₽` : '—';
 }
 
 const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
@@ -158,25 +164,25 @@ export default function PriceCalculator() {
     const items: { label: string; price: string }[] = [];
     let sum = 0;
 
-    const addItem = (label: string, searchKey: string) => {
-      const priceStr = findPrice(services, searchKey) || '';
+    const addItem = (label: string, exactName: string) => {
+      const priceStr = findPrice(services, exactName);
       const num = parsePrice(priceStr);
-      items.push({ label, price: priceStr || '—' });
+      items.push({ label, price: formatPrice(priceStr) });
       sum += num;
     };
 
     if (selected.has('sofa_straight') && sofaStraightSize) {
-      addItem(SOFA_STRAIGHT_SIZES[sofaStraightSize], sofaStraightSize === '2-местный' ? 'прямой' : 'прямой');
+      addItem(SOFA_STRAIGHT_SIZES[sofaStraightSize], SOFA_STRAIGHT_SIZES[sofaStraightSize]);
     }
     if (selected.has('sofa_corner') && sofaCornerSize) {
-      addItem(SOFA_CORNER_SIZES[sofaCornerSize], 'угловой');
+      addItem(SOFA_CORNER_SIZES[sofaCornerSize], SOFA_CORNER_SIZES[sofaCornerSize]);
     }
     if (selected.has('mattress') && mattressSize) {
-      addItem(MATTRESS_SIZES[mattressSize], 'матрас');
+      addItem(MATTRESS_SIZES[mattressSize], MATTRESS_SIZES[mattressSize]);
     }
-    if (selected.has('armchair')) addItem('Кресло', 'кресло');
-    if (selected.has('chair')) addItem('Стул', 'стул');
-    if (selected.has('odor')) addItem('Удаление запахов', 'запах');
+    if (selected.has('armchair')) addItem('Кресло', 'Кресло');
+    if (selected.has('chair')) addItem('Стул я мягкой обивкой', 'Стул я мягкой обивкой');
+    if (selected.has('odor')) addItem('Удаление запахов', 'Удаление запахов');
 
     setTotalItems(items);
     setTotalSum(sum);
