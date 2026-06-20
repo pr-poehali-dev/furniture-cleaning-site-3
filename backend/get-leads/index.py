@@ -26,7 +26,7 @@ def handler(event: dict, context) -> dict:
     if scope == 'services' and event.get('httpMethod') == 'GET' and not params.get('token'):
         conn = psycopg2.connect(os.environ['DATABASE_URL'])
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("SELECT * FROM services WHERE is_active = TRUE ORDER BY sort_order ASC, id ASC")
+        cur.execute("SELECT id, name, price, sort_order, is_active FROM services WHERE is_active = TRUE ORDER BY sort_order ASC, id ASC")
         rows = [dict(r) for r in cur.fetchall()]
         cur.close()
         conn.close()
