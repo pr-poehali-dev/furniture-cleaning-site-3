@@ -395,11 +395,9 @@ const Index = () => {
               <Button onClick={() => scrollTo('calculator')} size="lg" className="rounded-full text-base font-semibold h-14 px-8">
                 <Icon name="Calculator" size={20} className="mr-2" /> Рассчитать стоимость
               </Button>
-              <a href={TELEGRAM} target="_blank" rel="noreferrer">
-                <Button variant="outline" size="lg" className="rounded-full text-base font-semibold h-14 px-8 w-full border-2">
-                  <Icon name="Send" size={20} className="mr-2" /> Написать в Telegram
-                </Button>
-              </a>
+              <Button onClick={() => scrollTo('contacts')} variant="outline" size="lg" className="rounded-full text-base font-semibold h-14 px-8 border-2">
+                <Icon name="MessageCircle" size={20} className="mr-2" /> Связаться
+              </Button>
             </div>
           </Reveal>
         </div>
