@@ -30,12 +30,14 @@ def handler(event: dict, context) -> dict:
     comment = body.get('comment', '').strip()
     source = body.get('source', 'form').strip()
     furniture = body.get('furniture', '').strip()
+    appointed_at = body.get('appointed_at', '').strip()
+    address = body.get('address', '').strip()
 
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor()
     cur.execute(
-        "INSERT INTO leads (name, phone, comment, source, furniture) VALUES (%s, %s, %s, %s, %s) RETURNING id",
-        (name or None, phone or None, comment or None, source, furniture or None)
+        "INSERT INTO leads (name, phone, comment, source, furniture, appointed_at, address) VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id",
+        (name or None, phone or None, comment or None, source, furniture or None, appointed_at or None, address or None)
     )
     lead_id = cur.fetchone()[0]
     conn.commit()
@@ -46,7 +48,7 @@ def handler(event: dict, context) -> dict:
         'form': 'Форма заявки',
         'whatsapp': 'WhatsApp',
         'telegram': 'Telegram',
-        'furniture_picker': 'Подборщик мебели',
+        'calculator': 'Калькулятор цены',
     }.get(source, source)
 
     lines = [f"🆕 <b>Новая заявка #{lead_id}</b>", f"Источник: {source_label}"]
@@ -55,7 +57,11 @@ def handler(event: dict, context) -> dict:
     if phone:
         lines.append(f"Телефон: {phone}")
     if furniture:
-        lines.append(f"Мебель: {furniture}")
+        lines.append(f"Услуги: {furniture}")
+    if appointed_at:
+        lines.append(f"Дата и время: {appointed_at}")
+    if address:
+        lines.append(f"Адрес: {address}")
     if comment:
         lines.append(f"Комментарий: {comment}")
 

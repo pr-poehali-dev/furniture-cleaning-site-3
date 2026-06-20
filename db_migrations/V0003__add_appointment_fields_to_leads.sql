@@ -1,0 +1,3 @@
+ALTER TABLE leads
+  ADD COLUMN IF NOT EXISTS appointed_at TEXT,
+  ADD COLUMN IF NOT EXISTS address TEXT;

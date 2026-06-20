@@ -3,6 +3,7 @@ import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import PriceCalculator from '@/components/PriceCalculator';
 import {
   Accordion,
   AccordionContent,
@@ -526,11 +527,11 @@ const Index = () => {
       <section id="calculator" className="py-16 md:py-24 bg-secondary/40">
         <div className="container px-4 md:px-8">
           <Reveal>
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-3">Что нужно почистить?</h2>
-            <p className="text-center text-muted-foreground mb-10">Отметьте мебель — и мы сразу назовём точную цену в WhatsApp</p>
+            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center mb-3">Расчёт точной стоимости</h2>
+            <p className="text-center text-muted-foreground mb-10">Ответьте на несколько вопросов — узнайте цену за 30 секунд</p>
           </Reveal>
           <Reveal delay={80}>
-            <FurniturePicker />
+            <PriceCalculator />
           </Reveal>
         </div>
       </section>
