@@ -25,6 +25,7 @@ const SOURCE_LABELS: Record<string, string> = {
   whatsapp: 'WhatsApp',
   telegram: 'Telegram',
   furniture_picker: 'Подборщик мебели',
+  calculator: 'Калькулятор цены',
 };
 
 interface Lead {
@@ -34,6 +35,8 @@ interface Lead {
   comment: string | null;
   source: string;
   furniture: string | null;
+  appointed_at: string | null;
+  address: string | null;
   status: string;
   created_at: string;
 }
@@ -336,6 +339,18 @@ export default function Admin() {
                           <div className="flex items-center gap-2">
                             <Icon name="Phone" size={14} className="text-muted-foreground flex-shrink-0" />
                             <a href={`tel:${lead.phone}`} className="text-primary hover:underline">{lead.phone}</a>
+                          </div>
+                        )}
+                        {lead.appointed_at && (
+                          <div className="flex items-center gap-2 sm:col-span-2">
+                            <Icon name="CalendarCheck" size={14} className="text-primary flex-shrink-0" />
+                            <span className="font-medium text-primary">{lead.appointed_at}</span>
+                          </div>
+                        )}
+                        {lead.address && (
+                          <div className="flex items-center gap-2 sm:col-span-2">
+                            <Icon name="MapPin" size={14} className="text-muted-foreground flex-shrink-0" />
+                            <span>{lead.address}</span>
                           </div>
                         )}
                         {lead.furniture && (
