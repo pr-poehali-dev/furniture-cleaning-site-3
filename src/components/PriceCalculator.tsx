@@ -114,6 +114,31 @@ function Calendar({ onSelect }: { onSelect: (date: Date) => void }) {
   );
 }
 
+function CounterRow({ label, id, getCount, setCount }: {
+  label: string;
+  id: string;
+  getCount: (id: string) => number;
+  setCount: (id: string, val: number) => void;
+}) {
+  const count = getCount(id);
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => setCount(id, count - 1)}
+          className="w-9 h-9 rounded-xl border-2 border-border hover:border-primary/40 font-bold text-lg transition-all flex items-center justify-center"
+        >−</button>
+        <span className="font-bold text-xl w-6 text-center">{count}</span>
+        <button
+          onClick={() => setCount(id, count + 1)}
+          className="w-9 h-9 rounded-xl border-2 border-border hover:border-primary/40 font-bold text-lg transition-all flex items-center justify-center"
+        >+</button>
+      </div>
+    </div>
+  );
+}
+
 type Step = 'furniture' | 'details' | 'price' | 'booking' | 'contacts' | 'done';
 
 export default function PriceCalculator() {
@@ -126,7 +151,8 @@ export default function PriceCalculator() {
   const [sofaStraightSize, setSofaStraightSize] = useState('');
   const [sofaCornerSize, setSofaCornerSize] = useState('');
   const [mattressSize, setMattressSize] = useState('');
-  const [chairCount, setChairCount] = useState(1);
+  // Количество для каждого типа
+  const [counts, setCounts] = useState<Record<string, number>>({});
   // Шаг 3 — цена
   const [totalItems, setTotalItems] = useState<{ label: string; price: string }[]>([]);
   const [totalSum, setTotalSum] = useState(0);
@@ -150,11 +176,13 @@ export default function PriceCalculator() {
 
   const scrollTop = () => setTimeout(() => topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
 
+  const getCount = (id: string) => counts[id] ?? 1;
+  const setCount = (id: string, val: number) => setCounts(prev => ({ ...prev, [id]: Math.max(1, Math.min(20, val)) }));
+
   const needsStraightDetail = selected.has('sofa_straight');
   const needsCornerDetail = selected.has('sofa_corner');
   const needsMattressDetail = selected.has('mattress');
-  const needsChairDetail = selected.has('chair');
-  const needsDetails = needsStraightDetail || needsCornerDetail || needsMattressDetail || needsChairDetail;
+  const needsDetails = needsStraightDetail || needsCornerDetail || needsMattressDetail || selected.size > 0;
 
   const detailsReady = (
     (!needsStraightDetail || sofaStraightSize) &&
@@ -162,37 +190,45 @@ export default function PriceCalculator() {
     (!needsMattressDetail || mattressSize)
   );
 
+  const addItemWithCount = (
+    items: { label: string; price: string }[],
+    label: string,
+    exactName: string,
+    count: number,
+    sum: { val: number }
+  ) => {
+    const priceStr = findPrice(services, exactName);
+    const num = parsePrice(priceStr) * count;
+    const displayLabel = count > 1 ? `${label} × ${count}` : label;
+    items.push({ label: displayLabel, price: formatPrice(String(num)) });
+    sum.val += num;
+  };
+
   const calcPrice = () => {
     const items: { label: string; price: string }[] = [];
-    let sum = 0;
-
-    const addItem = (label: string, exactName: string) => {
-      const priceStr = findPrice(services, exactName);
-      const num = parsePrice(priceStr);
-      items.push({ label, price: formatPrice(priceStr) });
-      sum += num;
-    };
+    const sum = { val: 0 };
 
     if (selected.has('sofa_straight') && sofaStraightSize) {
-      addItem(SOFA_STRAIGHT_SIZES[sofaStraightSize], SOFA_STRAIGHT_SIZES[sofaStraightSize]);
+      addItemWithCount(items, SOFA_STRAIGHT_SIZES[sofaStraightSize], SOFA_STRAIGHT_SIZES[sofaStraightSize], getCount('sofa_straight'), sum);
     }
     if (selected.has('sofa_corner') && sofaCornerSize) {
-      addItem(SOFA_CORNER_SIZES[sofaCornerSize], SOFA_CORNER_SIZES[sofaCornerSize]);
+      addItemWithCount(items, SOFA_CORNER_SIZES[sofaCornerSize], SOFA_CORNER_SIZES[sofaCornerSize], getCount('sofa_corner'), sum);
     }
     if (selected.has('mattress') && mattressSize) {
-      addItem(MATTRESS_SIZES[mattressSize], MATTRESS_SIZES[mattressSize]);
+      addItemWithCount(items, MATTRESS_SIZES[mattressSize], MATTRESS_SIZES[mattressSize], getCount('mattress'), sum);
     }
-    if (selected.has('armchair')) addItem('Кресло', 'Кресло');
+    if (selected.has('armchair')) {
+      addItemWithCount(items, 'Кресло', 'Кресло', getCount('armchair'), sum);
+    }
     if (selected.has('chair')) {
-      const priceStr = findPrice(services, 'Стул с мягкой обивкой');
-      const num = parsePrice(priceStr);
-      items.push({ label: `Стул с мягкой обивкой × ${chairCount}`, price: formatPrice(String(num * chairCount)) });
-      sum += num * chairCount;
+      addItemWithCount(items, 'Стул с мягкой обивкой', 'Стул с мягкой обивкой', getCount('chair'), sum);
     }
-    if (selected.has('odor')) addItem('Удаление запахов', 'Удаление запахов');
+    if (selected.has('odor')) {
+      addItemWithCount(items, 'Удаление запахов', 'Удаление запахов', getCount('odor'), sum);
+    }
 
     setTotalItems(items);
-    setTotalSum(sum);
+    setTotalSum(sum.val);
     setStep('price');
     scrollTop();
   };
@@ -226,7 +262,7 @@ export default function PriceCalculator() {
   const reset = () => {
     setStep('furniture');
     setSelected(new Set());
-    setSofaStraightSize(''); setSofaCornerSize(''); setMattressSize(''); setChairCount(1);
+    setSofaStraightSize(''); setSofaCornerSize(''); setMattressSize(''); setCounts({});
     setTotalItems([]); setTotalSum(0);
     setBookingDate(null); setBookingTime('');
     setName(''); setPhone(''); setAddress('');
@@ -307,71 +343,61 @@ export default function PriceCalculator() {
           <h3 className="font-bold text-xl mb-1">Уточните параметры</h3>
           <p className="text-sm text-muted-foreground mb-5">Это нужно для точного расчёта</p>
           <div className="space-y-5">
+
             {needsStraightDetail && (
               <div>
                 <p className="font-semibold mb-2 text-sm">Размер прямого дивана</p>
-                <div className="flex gap-2">
+                <div className="flex gap-2 mb-3">
                   {Object.keys(SOFA_STRAIGHT_SIZES).map(s => (
-                    <button
-                      key={s}
-                      onClick={() => setSofaStraightSize(s)}
-                      className={`flex-1 py-3 rounded-xl border-2 font-medium text-sm transition-all ${
-                        sofaStraightSize === s ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40'
-                      }`}
+                    <button key={s} onClick={() => setSofaStraightSize(s)}
+                      className={`flex-1 py-3 rounded-xl border-2 font-medium text-sm transition-all ${sofaStraightSize === s ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40'}`}
                     >{s}</button>
                   ))}
                 </div>
+                <CounterRow label="Количество" id="sofa_straight" getCount={getCount} setCount={setCount} />
               </div>
             )}
+
             {needsCornerDetail && (
               <div>
                 <p className="font-semibold mb-2 text-sm">Размер углового дивана</p>
-                <div className="flex gap-2">
+                <div className="flex gap-2 mb-3">
                   {Object.keys(SOFA_CORNER_SIZES).map(s => (
-                    <button
-                      key={s}
-                      onClick={() => setSofaCornerSize(s)}
-                      className={`flex-1 py-3 rounded-xl border-2 font-medium text-sm transition-all ${
-                        sofaCornerSize === s ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40'
-                      }`}
+                    <button key={s} onClick={() => setSofaCornerSize(s)}
+                      className={`flex-1 py-3 rounded-xl border-2 font-medium text-sm transition-all ${sofaCornerSize === s ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40'}`}
                     >{s}</button>
                   ))}
                 </div>
+                <CounterRow label="Количество" id="sofa_corner" getCount={getCount} setCount={setCount} />
               </div>
             )}
+
             {needsMattressDetail && (
               <div>
                 <p className="font-semibold mb-2 text-sm">Размер матраса</p>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2 flex-wrap mb-3">
                   {Object.keys(MATTRESS_SIZES).map(s => (
-                    <button
-                      key={s}
-                      onClick={() => setMattressSize(s)}
-                      className={`flex-1 min-w-[90px] py-3 rounded-xl border-2 font-medium text-sm transition-all ${
-                        mattressSize === s ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40'
-                      }`}
+                    <button key={s} onClick={() => setMattressSize(s)}
+                      className={`flex-1 min-w-[90px] py-3 rounded-xl border-2 font-medium text-sm transition-all ${mattressSize === s ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40'}`}
                     >{s}</button>
                   ))}
                 </div>
+                <CounterRow label="Количество" id="mattress" getCount={getCount} setCount={setCount} />
               </div>
             )}
-            {needsChairDetail && (
-              <div>
-                <p className="font-semibold mb-2 text-sm">Количество стульев</p>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setChairCount(c => Math.max(1, c - 1))}
-                    className="w-11 h-11 rounded-xl border-2 border-border hover:border-primary/40 font-bold text-lg transition-all flex items-center justify-center"
-                  >−</button>
-                  <span className="font-bold text-2xl w-8 text-center">{chairCount}</span>
-                  <button
-                    onClick={() => setChairCount(c => Math.min(20, c + 1))}
-                    className="w-11 h-11 rounded-xl border-2 border-border hover:border-primary/40 font-bold text-lg transition-all flex items-center justify-center"
-                  >+</button>
-                  <span className="text-sm text-muted-foreground">шт.</span>
-                </div>
-              </div>
+
+            {selected.has('armchair') && (
+              <CounterRow label="Количество кресел" id="armchair" getCount={getCount} setCount={setCount} />
             )}
+
+            {selected.has('chair') && (
+              <CounterRow label="Количество стульев" id="chair" getCount={getCount} setCount={setCount} />
+            )}
+
+            {selected.has('odor') && (
+              <CounterRow label="Удаление запахов (предметов)" id="odor" getCount={getCount} setCount={setCount} />
+            )}
+
           </div>
           <div className="flex gap-3 mt-6">
             <Button variant="outline" onClick={() => setStep('furniture')} className="rounded-xl h-12 px-5">
