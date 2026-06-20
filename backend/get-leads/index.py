@@ -39,11 +39,16 @@ def handler(event: dict, context) -> dict:
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
+    def serialize_service(r):
+        row = dict(r)
+        row.pop('created_at', None)
+        return row
+
     # --- УСЛУГИ ---
     if scope == 'services':
         if method == 'GET':
             cur.execute("SELECT * FROM services ORDER BY sort_order ASC, id ASC")
-            rows = [dict(r) for r in cur.fetchall()]
+            rows = [serialize_service(r) for r in cur.fetchall()]
             cur.close()
             conn.close()
             return {'statusCode': 200, 'headers': CORS, 'body': json.dumps({'services': rows})}
@@ -62,7 +67,7 @@ def handler(event: dict, context) -> dict:
                 "INSERT INTO services (name, price, sort_order) VALUES (%s, %s, %s) RETURNING *",
                 (name, price, sort_order)
             )
-            row = dict(cur.fetchone())
+            row = serialize_service(cur.fetchone())
             conn.commit()
             cur.close()
             conn.close()
