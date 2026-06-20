@@ -325,9 +325,12 @@ function Reveal({ children, className = '', delay = 0 }: { children: React.React
 
 interface Service { id: number; name: string; price: string; }
 
+const SECTION_IDS = NAV.map(n => n.id);
+
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
+  const [currentSection, setCurrentSection] = useState(0);
 
   useEffect(() => {
     fetch(`${SERVICES_URL}?scope=services`)
@@ -336,14 +339,67 @@ const Index = () => {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const idx = SECTION_IDS.indexOf(entry.target.id);
+            if (idx !== -1) setCurrentSection(idx);
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+    SECTION_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const scrollTo = (id: string) => {
     setMenuOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const goTo = (delta: number) => {
+    const next = Math.max(0, Math.min(SECTION_IDS.length - 1, currentSection + delta));
+    scrollTo(SECTION_IDS[next]);
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+
+      {/* Section nav arrows */}
+      <div className="fixed right-4 md:right-6 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2">
+        <button
+          onClick={() => goTo(-1)}
+          disabled={currentSection === 0}
+          className="grid place-items-center w-10 h-10 rounded-full bg-card border border-border shadow-lg text-muted-foreground hover:text-primary hover:border-primary/40 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+          aria-label="Предыдущий блок"
+        >
+          <Icon name="ChevronUp" size={18} />
+        </button>
+        <div className="flex flex-col items-center gap-1.5 py-1">
+          {SECTION_IDS.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => scrollTo(SECTION_IDS[i])}
+              className={`rounded-full transition-all ${i === currentSection ? 'w-1.5 h-4 bg-primary' : 'w-1.5 h-1.5 bg-border hover:bg-primary/50'}`}
+            />
+          ))}
+        </div>
+        <button
+          onClick={() => goTo(1)}
+          disabled={currentSection === SECTION_IDS.length - 1}
+          className="grid place-items-center w-10 h-10 rounded-full bg-card border border-border shadow-lg text-muted-foreground hover:text-primary hover:border-primary/40 transition-all disabled:opacity-20 disabled:cursor-not-allowed"
+          aria-label="Следующий блок"
+        >
+          <Icon name="ChevronDown" size={18} />
+        </button>
+      </div>
+
       {/* Header */}
       <header className="fixed top-0 inset-x-0 z-40 backdrop-blur-md bg-background/80 border-b border-border">
         <div className="container flex items-center justify-between h-16 px-4 md:px-8">
