@@ -161,7 +161,7 @@ function getUpsells(selected: Set<string>): Upsell[] {
       id: 'family',
       title: 'Семейный пакет',
       desc: 'Добавьте чистку матраса — часто они загрязнены так же, как диван. Вместе дешевле.',
-      badge: 'Выгода 500 ₽',
+      badge: 'Скидка 10%',
       addItems: ['mattress'],
     });
   }
@@ -170,7 +170,7 @@ function getUpsells(selected: Set<string>): Upsell[] {
       id: 'family',
       title: 'Семейный пакет',
       desc: 'Добавьте чистку дивана — мастер уже приедет, а вместе это выгоднее.',
-      badge: 'Выгода 500 ₽',
+      badge: 'Скидка 10%',
       addItems: ['sofa_straight'],
     });
   }
@@ -179,7 +179,7 @@ function getUpsells(selected: Set<string>): Upsell[] {
       id: 'pets',
       title: 'После питомцев',
       desc: 'Устранение запахов делается одновременно с чисткой. Диван будет пахнуть свежестью.',
-      badge: 'Выгода 300 ₽',
+      badge: 'Скидка 10%',
       addItems: ['odor'],
     });
   }
@@ -333,15 +333,15 @@ export default function PriceCalculator() {
           const priceStr = findPrice(services, MATTRESS_SIZES['Двухместный']);
           const num = parsePrice(priceStr);
           if (num > 0) {
-            items.push({ label: 'Матрас двуспальный (пакет)', price: formatPrice(String(num)) });
+            items.push({ label: 'Матрас двуспальный', price: formatPrice(String(num)) });
             sum.val += num;
           }
         }
-        if ((itemId === 'sofa_straight') && !selected.has('sofa_straight') && !selected.has('sofa_corner')) {
+        if (itemId === 'sofa_straight' && !selected.has('sofa_straight') && !selected.has('sofa_corner')) {
           const priceStr = findPrice(services, SOFA_STRAIGHT_SIZES['3-местный']);
           const num = parsePrice(priceStr);
           if (num > 0) {
-            items.push({ label: 'Диван прямой 3-местный (пакет)', price: formatPrice(String(num)) });
+            items.push({ label: 'Диван прямой 3-местный', price: formatPrice(String(num)) });
             sum.val += num;
           }
         }
@@ -349,11 +349,17 @@ export default function PriceCalculator() {
           const priceStr = findPrice(services, 'Удаление запахов');
           const num = parsePrice(priceStr);
           if (num > 0) {
-            items.push({ label: 'Удаление запахов (пакет)', price: formatPrice(String(num)) });
+            items.push({ label: 'Удаление запахов', price: formatPrice(String(num)) });
             sum.val += num;
           }
         }
       }
+    }
+
+    if (accepted.size > 0 && sum.val > 0) {
+      const discount = Math.round(sum.val * 0.1);
+      items.push({ label: 'Скидка по пакету −10%', price: `−${discount.toLocaleString('ru-RU')} ₽` });
+      sum.val = sum.val - discount;
     }
 
     setTotalItems(items);
