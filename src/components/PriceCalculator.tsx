@@ -201,6 +201,7 @@ export default function PriceCalculator() {
   // Шаг 3 — цена
   const [totalItems, setTotalItems] = useState<{ label: string; price: string }[]>([]);
   const [totalSum, setTotalSum] = useState(0);
+  const [originalSum, setOriginalSum] = useState(0);
   // Шаг 4 — запись
   const [bookingDate, setBookingDate] = useState<Date | null>(null);
   const [bookingTime, setBookingTime] = useState('');
@@ -314,7 +315,7 @@ export default function PriceCalculator() {
     setStep('furniture');
     setSelected(new Set());
     setSofaStraightSize(''); setSofaCornerSize(''); setMattressSize(''); setCounts({});
-    setTotalItems([]); setTotalSum(0);
+    setTotalItems([]); setTotalSum(0); setOriginalSum(0);
     setBookingDate(null); setBookingTime('');
     setName(''); setPhone(''); setAddress(''); setUserComment('');
     setAcceptedUpsells(new Set());
@@ -357,9 +358,13 @@ export default function PriceCalculator() {
     }
 
     if (accepted.size > 0 && sum.val > 0) {
+      const beforeDiscount = sum.val;
       const discount = Math.round(sum.val * 0.1);
       items.push({ label: 'Скидка по пакету −10%', price: `−${discount.toLocaleString('ru-RU')} ₽` });
       sum.val = sum.val - discount;
+      setOriginalSum(beforeDiscount);
+    } else {
+      setOriginalSum(0);
     }
 
     setTotalItems(items);
@@ -585,9 +590,16 @@ export default function PriceCalculator() {
           </div>
           <div className="flex justify-between items-center bg-primary/5 border border-primary/20 rounded-xl px-4 py-3.5 mb-6">
             <span className="font-semibold">Итого</span>
-            <span className="font-bold text-2xl text-primary">
-              {totalSum > 0 ? `${totalSum.toLocaleString('ru-RU')} ₽` : 'по прайсу'}
-            </span>
+            <div className="text-right">
+              {originalSum > 0 && (
+                <div className="text-sm text-muted-foreground line-through">
+                  {originalSum.toLocaleString('ru-RU')} ₽
+                </div>
+              )}
+              <span className="font-bold text-2xl text-primary">
+                {totalSum > 0 ? `${totalSum.toLocaleString('ru-RU')} ₽` : 'по прайсу'}
+              </span>
+            </div>
           </div>
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => {
