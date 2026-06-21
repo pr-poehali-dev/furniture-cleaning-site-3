@@ -12,7 +12,6 @@ import {
 const NAV = [
   { id: 'hero', label: 'Главная' },
   { id: 'services', label: 'Услуги' },
-  { id: 'packages', label: 'Пакеты' },
   { id: 'reviews', label: 'Отзывы' },
   { id: 'calculator', label: 'Калькулятор' },
   { id: 'process', label: 'Процесс' },
@@ -34,11 +33,7 @@ const ADVANTAGES = [
   { icon: 'Sparkles', title: 'Работаем бережно', desc: 'Профессиональная экстракторная чистка без вреда для ткани.' },
 ];
 
-const PACKAGES = [
-  { name: 'Семейный', items: 'Диван + матрас', price: '5 900 ₽', popular: false },
-  { name: 'После питомцев', items: 'Диван + устранение запаха', price: '6 900 ₽', popular: true },
-  { name: 'Полное обновление', items: 'Диван + матрас + 4 стула', price: '9 900 ₽', popular: false },
-];
+
 
 const PRICE = [
   { name: 'Прямой диван', price: 'от 3 500 ₽', icon: 'Sofa' },
@@ -446,38 +441,6 @@ const Index = () => {
                   </div>
                   <h3 className="font-display font-bold text-xl mb-2">{a.title}</h3>
                   <p className="text-muted-foreground">{a.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Packages */}
-      <section id="packages" className="py-16 md:py-24 bg-secondary/40">
-        <div className="container px-4 md:px-8">
-          <Reveal>
-            <h2 className="font-display font-extrabold text-3xl md:text-5xl text-center">Пакетные предложения</h2>
-          </Reveal>
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PACKAGES.map((p, i) => (
-              <Reveal key={p.name} delay={i * 100}>
-                <div className={`relative h-full rounded-3xl p-8 flex flex-col ${p.popular ? 'bg-primary text-primary-foreground shadow-xl md:scale-105' : 'bg-card border border-border'}`}>
-                  {p.popular && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-accent text-accent-foreground text-xs font-bold uppercase tracking-wide">
-                      Хит
-                    </span>
-                  )}
-                  <h3 className="font-display font-bold text-2xl">{p.name}</h3>
-                  <p className={`mt-2 ${p.popular ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>{p.items}</p>
-                  <div className="font-display font-black text-4xl mt-6 mb-8">{p.price}</div>
-                  <Button
-                    onClick={() => scrollTo('contacts')}
-                    className={`mt-auto rounded-full font-semibold h-12 ${p.popular ? 'bg-accent text-accent-foreground hover:bg-accent/90' : ''}`}
-                    variant={p.popular ? 'default' : 'default'}
-                  >
-                    Выбрать
-                  </Button>
                 </div>
               </Reveal>
             ))}

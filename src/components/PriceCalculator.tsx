@@ -140,7 +140,51 @@ function CounterRow({ label, id, getCount, setCount }: {
   );
 }
 
-type Step = 'furniture' | 'details' | 'price' | 'booking' | 'contacts' | 'done';
+type Step = 'furniture' | 'details' | 'price' | 'upsell' | 'booking' | 'contacts' | 'done';
+
+interface Upsell {
+  id: string;
+  title: string;
+  desc: string;
+  badge: string;
+  addItems: string[];
+}
+
+function getUpsells(selected: Set<string>): Upsell[] {
+  const hasSofa = selected.has('sofa_straight') || selected.has('sofa_corner');
+  const hasMattress = selected.has('mattress');
+  const hasOdor = selected.has('odor');
+  const result: Upsell[] = [];
+
+  if (hasSofa && !hasMattress) {
+    result.push({
+      id: 'family',
+      title: 'Семейный пакет',
+      desc: 'Добавьте чистку матраса — часто они загрязнены так же, как диван. Вместе дешевле.',
+      badge: 'Выгода 500 ₽',
+      addItems: ['mattress'],
+    });
+  }
+  if (hasMattress && !hasSofa) {
+    result.push({
+      id: 'family',
+      title: 'Семейный пакет',
+      desc: 'Добавьте чистку дивана — мастер уже приедет, а вместе это выгоднее.',
+      badge: 'Выгода 500 ₽',
+      addItems: ['sofa_straight'],
+    });
+  }
+  if (hasSofa && !hasOdor) {
+    result.push({
+      id: 'pets',
+      title: 'После питомцев',
+      desc: 'Устранение запахов делается одновременно с чисткой. Диван будет пахнуть свежестью.',
+      badge: 'Выгода 300 ₽',
+      addItems: ['odor'],
+    });
+  }
+  return result;
+}
 
 export default function PriceCalculator() {
   const [services, setServices] = useState<Service[]>([]);
@@ -166,6 +210,7 @@ export default function PriceCalculator() {
   const [address, setAddress] = useState('');
   const [userComment, setUserComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [acceptedUpsells, setAcceptedUpsells] = useState<Set<string>>(new Set());
 
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -231,7 +276,8 @@ export default function PriceCalculator() {
 
     setTotalItems(items);
     setTotalSum(sum.val);
-    setStep('price');
+    const upsells = getUpsells(selected);
+    setStep(upsells.length > 0 ? 'upsell' : 'price');
     scrollTop();
   };
 
@@ -271,6 +317,48 @@ export default function PriceCalculator() {
     setTotalItems([]); setTotalSum(0);
     setBookingDate(null); setBookingTime('');
     setName(''); setPhone(''); setAddress(''); setUserComment('');
+    setAcceptedUpsells(new Set());
+    scrollTop();
+  };
+
+  const applyUpsellsAndGoToPrice = (accepted: Set<string>) => {
+    const upsells = getUpsells(selected);
+    const items = [...totalItems];
+    const sum = { val: totalSum };
+
+    for (const upsell of upsells) {
+      if (!accepted.has(upsell.id)) continue;
+      for (const itemId of upsell.addItems) {
+        if (itemId === 'mattress' && !selected.has('mattress')) {
+          const priceStr = findPrice(services, MATTRESS_SIZES['Двухместный']);
+          const num = parsePrice(priceStr);
+          if (num > 0) {
+            items.push({ label: 'Матрас двуспальный (пакет)', price: formatPrice(String(num)) });
+            sum.val += num;
+          }
+        }
+        if ((itemId === 'sofa_straight') && !selected.has('sofa_straight') && !selected.has('sofa_corner')) {
+          const priceStr = findPrice(services, SOFA_STRAIGHT_SIZES['3-местный']);
+          const num = parsePrice(priceStr);
+          if (num > 0) {
+            items.push({ label: 'Диван прямой 3-местный (пакет)', price: formatPrice(String(num)) });
+            sum.val += num;
+          }
+        }
+        if (itemId === 'odor' && !selected.has('odor')) {
+          const priceStr = findPrice(services, 'Удаление запахов');
+          const num = parsePrice(priceStr);
+          if (num > 0) {
+            items.push({ label: 'Удаление запахов (пакет)', price: formatPrice(String(num)) });
+            sum.val += num;
+          }
+        }
+      }
+    }
+
+    setTotalItems(items);
+    setTotalSum(sum.val);
+    setStep('price');
     scrollTop();
   };
 
@@ -415,6 +503,60 @@ export default function PriceCalculator() {
         </div>
       )}
 
+      {/* ШАГ UPSELL — допродажи */}
+      {step === 'upsell' && (() => {
+        const upsells = getUpsells(selected);
+        return (
+          <div>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="grid place-items-center w-12 h-12 rounded-xl bg-accent/20 text-accent-foreground flex-shrink-0">
+                <Icon name="Sparkles" size={24} />
+              </div>
+              <div>
+                <h3 className="font-bold text-xl leading-tight">Специальные предложения</h3>
+                <p className="text-sm text-muted-foreground">Добавьте услугу и сэкономьте</p>
+              </div>
+            </div>
+            <div className="space-y-3 mb-6">
+              {upsells.map(u => (
+                <div
+                  key={u.id}
+                  onClick={() => {
+                    setAcceptedUpsells(prev => {
+                      const next = new Set(prev);
+                      if (next.has(u.id)) next.delete(u.id); else next.add(u.id);
+                      return next;
+                    });
+                  }}
+                  className={`relative cursor-pointer rounded-2xl border-2 p-4 transition-all ${acceptedUpsells.has(u.id) ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40'}`}
+                >
+                  <span className="absolute -top-2.5 right-4 px-2.5 py-0.5 rounded-full bg-accent text-accent-foreground text-xs font-bold">
+                    {u.badge}
+                  </span>
+                  <div className="flex items-start gap-3">
+                    <div className={`mt-0.5 w-5 h-5 rounded-md border-2 flex-shrink-0 flex items-center justify-center transition-all ${acceptedUpsells.has(u.id) ? 'bg-primary border-primary' : 'border-border'}`}>
+                      {acceptedUpsells.has(u.id) && <Icon name="Check" size={12} className="text-primary-foreground" />}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-sm">{u.title}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">{u.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => { setStep(needsDetails ? 'details' : 'furniture'); }} className="rounded-xl h-12 px-5">
+                <Icon name="ArrowLeft" size={16} />
+              </Button>
+              <Button onClick={() => applyUpsellsAndGoToPrice(acceptedUpsells)} className="flex-1 rounded-xl h-12 font-semibold">
+                {acceptedUpsells.size > 0 ? 'Добавить и посмотреть цену' : 'Пропустить'} <Icon name="ArrowRight" size={16} className="ml-2" />
+              </Button>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ШАГ 3 — показ цены */}
       {step === 'price' && (
         <div>
@@ -442,7 +584,10 @@ export default function PriceCalculator() {
             </span>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setStep(needsDetails ? 'details' : 'furniture')} className="rounded-xl h-12 px-5">
+            <Button variant="outline" onClick={() => {
+              const upsells = getUpsells(selected);
+              setStep(upsells.length > 0 ? 'upsell' : needsDetails ? 'details' : 'furniture');
+            }} className="rounded-xl h-12 px-5">
               <Icon name="ArrowLeft" size={16} />
             </Button>
             <Button onClick={() => { setStep('booking'); scrollTop(); }} className="flex-1 rounded-xl h-12 font-semibold">
