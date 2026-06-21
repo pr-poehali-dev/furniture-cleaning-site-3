@@ -282,7 +282,9 @@ export default function Admin() {
             {Object.entries(STATUS_LABELS).map(([key, label]) => (
               <div key={key} className="bg-card border border-border rounded-2xl p-4">
                 <p className="text-muted-foreground text-xs mb-1">{label}</p>
-                <p className="font-bold text-2xl">{counts[key] || 0}</p>
+                <p className="font-bold text-2xl">
+                  {leadsLoading ? <span className="text-muted-foreground text-lg">—</span> : (counts[key] || 0)}
+                </p>
               </div>
             ))}
           </div>
