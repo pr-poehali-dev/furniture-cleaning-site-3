@@ -63,7 +63,7 @@ export default function Admin() {
 
   // CRM
   const [leads, setLeads] = useState<Lead[]>([]);
-  const [leadsLoading, setLeadsLoading] = useState(false);
+  const [leadsLoading, setLeadsLoading] = useState(() => !!localStorage.getItem('admin_token'));
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
 
