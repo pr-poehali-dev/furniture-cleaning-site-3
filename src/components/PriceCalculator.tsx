@@ -605,6 +605,10 @@ export default function PriceCalculator() {
               </div>
             ))}
           </div>
+          <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4">
+            <Icon name="ShieldCheck" size={20} className="text-green-600 flex-shrink-0" />
+            <p className="text-sm text-green-800 font-medium">Гарантия качества — если не понравится, переделаем бесплатно</p>
+          </div>
           <div className="flex justify-between items-center bg-primary/5 border border-primary/20 rounded-xl px-4 py-3.5 mb-6">
             <span className="font-semibold">Итого</span>
             <div className="text-right">
@@ -701,6 +705,30 @@ export default function PriceCalculator() {
               </span>
             </div>
           )}
+          <div className="bg-secondary/40 rounded-2xl px-4 py-3 mb-4 space-y-1.5">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Ваш заказ</p>
+            {totalItems.filter(i => !i.label.startsWith('Скидка')).map((item, i) => (
+              <div key={i} className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">{item.label}</span>
+                <span className="font-medium">{item.price || '—'}</span>
+              </div>
+            ))}
+            {originalSum > 0 && (
+              <div className="flex justify-between items-center text-sm text-green-700">
+                <span>Скидка по пакету −10%</span>
+                <span className="font-medium">−{(originalSum - totalSum).toLocaleString('ru-RU')} ₽</span>
+              </div>
+            )}
+            <div className="border-t border-border pt-2 mt-2 flex justify-between items-center">
+              <span className="font-semibold text-sm">Итого</span>
+              <div className="text-right">
+                {originalSum > 0 && (
+                  <div className="text-xs text-muted-foreground line-through">{originalSum.toLocaleString('ru-RU')} ₽</div>
+                )}
+                <span className="font-bold text-primary">{totalSum > 0 ? `${totalSum.toLocaleString('ru-RU')} ₽` : 'по прайсу'}</span>
+              </div>
+            </div>
+          </div>
           <div className="space-y-3 mb-5">
             <Input
               placeholder="Ваше имя"
