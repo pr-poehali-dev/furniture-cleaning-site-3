@@ -516,6 +516,16 @@ const Index = () => {
               </Reveal>
             ))}
           </div>
+          <Reveal>
+            <div className="flex justify-center mt-10">
+              <Button size="lg" className="rounded-2xl h-14 px-8 font-semibold text-base" onClick={() => {
+                document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' });
+              }}>
+                <Icon name="Calculator" size={20} className="mr-2" />
+                Рассчитать стоимость
+              </Button>
+            </div>
+          </Reveal>
         </div>
       </section>
 
