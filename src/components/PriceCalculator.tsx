@@ -322,10 +322,27 @@ export default function PriceCalculator() {
     scrollTop();
   };
 
+  const buildBaseItems = () => {
+    const items: { label: string; price: string }[] = [];
+    const sum = { val: 0 };
+    if (selected.has('sofa_straight') && sofaStraightSize)
+      addItemWithCount(items, SOFA_STRAIGHT_SIZES[sofaStraightSize], SOFA_STRAIGHT_SIZES[sofaStraightSize], getCount('sofa_straight'), sum);
+    if (selected.has('sofa_corner') && sofaCornerSize)
+      addItemWithCount(items, SOFA_CORNER_SIZES[sofaCornerSize], SOFA_CORNER_SIZES[sofaCornerSize], getCount('sofa_corner'), sum);
+    if (selected.has('mattress') && mattressSize)
+      addItemWithCount(items, MATTRESS_SIZES[mattressSize], MATTRESS_SIZES[mattressSize], getCount('mattress'), sum);
+    if (selected.has('armchair'))
+      addItemWithCount(items, 'Кресло', 'Кресло', getCount('armchair'), sum);
+    if (selected.has('chair'))
+      addItemWithCount(items, 'Стул с мягкой обивкой', 'Стул с мягкой обивкой', getCount('chair'), sum);
+    if (selected.has('odor'))
+      addItemWithCount(items, 'Удаление запахов', 'Удаление запахов', getCount('odor'), sum);
+    return { items, sum };
+  };
+
   const applyUpsellsAndGoToPrice = (accepted: Set<string>) => {
+    const { items, sum } = buildBaseItems();
     const upsells = getUpsells(selected);
-    const items = [...totalItems];
-    const sum = { val: totalSum };
 
     for (const upsell of upsells) {
       if (!accepted.has(upsell.id)) continue;
@@ -604,7 +621,12 @@ export default function PriceCalculator() {
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => {
               const upsells = getUpsells(selected);
-              setStep(upsells.length > 0 ? 'upsell' : needsDetails ? 'details' : 'furniture');
+              if (upsells.length > 0) {
+                setAcceptedUpsells(new Set());
+                setStep('upsell');
+              } else {
+                setStep(needsDetails ? 'details' : 'furniture');
+              }
             }} className="rounded-xl h-12 px-5">
               <Icon name="ArrowLeft" size={16} />
             </Button>
