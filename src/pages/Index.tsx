@@ -45,9 +45,9 @@ const PRICE = [
 ];
 
 const STEPS = [
-  { icon: 'Camera', title: 'Отправляете фото мебели' },
-  { icon: 'Calculator', title: 'Фиксируем стоимость' },
-  { icon: 'Car', title: 'Приезжаем в назначенное время' },
+  { icon: 'Calculator', title: 'Считаете стоимость в калькуляторе на сайте' },
+  { icon: 'CalendarCheck', title: 'Записываетесь онлайн на удобное время' },
+  { icon: 'Car', title: 'Мастер приезжает в назначенное время' },
   { icon: 'Sparkles', title: 'Выполняем химчистку' },
   { icon: 'ThumbsUp', title: 'Вы принимаете работу' },
   { icon: 'Wallet', title: 'Оплачиваете результат' },
