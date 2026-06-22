@@ -298,7 +298,7 @@ export default function Admin() {
               }`}
             >
               <Icon name="ListChecks" size={16} />
-              Услуги и цены
+              Управление услугами
             </button>
             <button
               onClick={() => setTab('finance')}
@@ -450,7 +450,7 @@ export default function Admin() {
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="font-bold text-xl">Услуги и цены</h2>
+              <h2 className="font-bold text-xl">Управление услугами</h2>
               <p className="text-sm text-muted-foreground">Изменения сразу отображаются на сайте</p>
             </div>
             <Button onClick={() => { setAddingNew(true); setEditingService(null); }} className="gap-2 rounded-xl">
