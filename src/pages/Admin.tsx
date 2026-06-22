@@ -76,6 +76,10 @@ export default function Admin() {
   const [savingService, setSavingService] = useState(false);
   const [addingNew, setAddingNew] = useState(false);
 
+  // Finance
+  const [finDateFrom, setFinDateFrom] = useState('');
+  const [finDateTo, setFinDateTo] = useState('');
+
   const fetchLeads = useCallback(async (t: string) => {
     setLeadsLoading(true);
     try {
@@ -233,8 +237,23 @@ export default function Admin() {
     return matches.reduce((s, m) => s + parseInt(m.replace(/\D/g, ''), 10), 0);
   };
 
+  // Finance filters
+  const QUICK_PERIODS = [
+    { label: 'Всё время', from: '', to: '' },
+    { label: 'Этот месяц', from: (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`; })(), to: (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(new Date(d.getFullYear(),d.getMonth()+1,0).getDate()).padStart(2,'0')}`; })() },
+    { label: 'Прошлый месяц', from: (() => { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()-1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`; })(), to: (() => { const d = new Date(); d.setDate(0); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })() },
+    { label: 'Этот год', from: `${new Date().getFullYear()}-01-01`, to: `${new Date().getFullYear()}-12-31` },
+  ];
+
+  const finLeads = leads.filter(l => {
+    const d = new Date(l.created_at);
+    if (finDateFrom && d < new Date(finDateFrom)) return false;
+    if (finDateTo && d > new Date(finDateTo + 'T23:59:59')) return false;
+    return true;
+  });
+
   const financeStats = Object.keys(STATUS_LABELS).map((key) => {
-    const statusLeads = leads.filter(l => l.status === key);
+    const statusLeads = finLeads.filter(l => l.status === key);
     const total = statusLeads.reduce((sum, l) => sum + parseLeadSum(l), 0);
     return { key, count: statusLeads.length, total };
   });
@@ -242,7 +261,7 @@ export default function Admin() {
   const MONTH_NAMES = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
   const monthlyData = (() => {
     const map: Record<string, { month: string; выручка: number; заказов: number }> = {};
-    leads.filter(l => l.status === 'done').forEach(l => {
+    finLeads.filter(l => l.status === 'done').forEach(l => {
       const d = new Date(l.created_at);
       const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
       if (!map[key]) map[key] = { month: `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`, выручка: 0, заказов: 0 };
@@ -553,6 +572,37 @@ export default function Admin() {
           <div>
             <h2 className="text-lg font-bold mb-1">Финансы</h2>
             <p className="text-sm text-muted-foreground">Сводка по заказам и суммам в разбивке по статусам</p>
+          </div>
+
+          {/* Фильтр по датам */}
+          <div className="bg-card border border-border rounded-2xl p-4 space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {QUICK_PERIODS.map(p => {
+                const active = finDateFrom === p.from && finDateTo === p.to;
+                return (
+                  <button
+                    key={p.label}
+                    onClick={() => { setFinDateFrom(p.from); setFinDateTo(p.to); }}
+                    className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors border ${active ? 'bg-primary text-primary-foreground border-primary' : 'border-border hover:border-primary/40 text-muted-foreground'}`}
+                  >{p.label}</button>
+                );
+              })}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 items-center">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">С</span>
+                <Input type="date" value={finDateFrom} onChange={e => setFinDateFrom(e.target.value)} className="rounded-xl h-9 text-sm" />
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">По</span>
+                <Input type="date" value={finDateTo} onChange={e => setFinDateTo(e.target.value)} className="rounded-xl h-9 text-sm" />
+              </div>
+              {(finDateFrom || finDateTo) && (
+                <button onClick={() => { setFinDateFrom(''); setFinDateTo(''); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap">
+                  Сбросить
+                </button>
+              )}
+            </div>
           </div>
 
           {leadsLoading ? (
