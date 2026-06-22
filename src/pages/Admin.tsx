@@ -67,6 +67,10 @@ export default function Admin() {
   const [leadsLoading, setLeadsLoading] = useState(() => !!localStorage.getItem('admin_token'));
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [crmView, setCrmView] = useState<'list' | 'calendar'>('list');
+  const [calYear, setCalYear] = useState(new Date().getFullYear());
+  const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const [calSelected, setCalSelected] = useState<string | null>(null);
 
   // Services
   const [services, setServices] = useState<Service[]>([]);
@@ -346,38 +350,146 @@ export default function Admin() {
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Input
-              placeholder="Поиск по имени, телефону, комментарию..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="rounded-xl h-10 max-w-xs"
-            />
-            <div className="flex gap-2 flex-wrap">
-              {[['all', 'Все'], ...Object.entries(STATUS_LABELS)].map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setFilter(key)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    filter === key ? 'bg-primary text-primary-foreground' : 'bg-card border border-border hover:bg-secondary'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="flex gap-1 bg-secondary rounded-xl p-1">
+              <button onClick={() => setCrmView('list')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${crmView === 'list' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'}`}>
+                <Icon name="List" size={14} /> Список
+              </button>
+              <button onClick={() => setCrmView('calendar')} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${crmView === 'calendar' ? 'bg-card shadow-sm text-foreground' : 'text-muted-foreground'}`}>
+                <Icon name="CalendarDays" size={14} /> Календарь
+              </button>
             </div>
+            {crmView === 'list' && (
+              <>
+                <Input
+                  placeholder="Поиск по имени, телефону, комментарию..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="rounded-xl h-10 max-w-xs"
+                />
+                <div className="flex gap-2 flex-wrap">
+                  {[['all', 'Все'], ...Object.entries(STATUS_LABELS)].map(([key, label]) => (
+                    <button
+                      key={key}
+                      onClick={() => setFilter(key)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                        filter === key ? 'bg-primary text-primary-foreground' : 'bg-card border border-border hover:bg-secondary'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
-          {leadsLoading ? (
+          {/* Calendar view */}
+          {crmView === 'calendar' && !leadsLoading && (() => {
+            const DAYS_SHORT = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+            const MONTHS_FULL = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+            const firstDay = new Date(calYear, calMonth, 1).getDay();
+            const offset = firstDay === 0 ? 6 : firstDay - 1;
+            const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+            const cells: (number | null)[] = [];
+            for (let i = 0; i < offset; i++) cells.push(null);
+            for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+            const leadsByDay: Record<string, Lead[]> = {};
+            leads.forEach(l => {
+              if (!l.appointed_at) return;
+              const match = l.appointed_at.match(/^(\d{2})\.(\d{2})\.(\d{4})/);
+              if (!match) return;
+              const key = `${match[3]}-${match[2]}-${match[1]}`;
+              if (!leadsByDay[key]) leadsByDay[key] = [];
+              leadsByDay[key].push(l);
+            });
+
+            const selKey = calSelected;
+            const selLeads = selKey ? (leadsByDay[selKey] || []) : [];
+
+            return (
+              <div className="space-y-4">
+                <div className="bg-card border border-border rounded-2xl p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <button onClick={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y-1); } else setCalMonth(m => m-1); setCalSelected(null); }} className="p-2 rounded-xl hover:bg-secondary transition-colors"><Icon name="ChevronLeft" size={18} /></button>
+                    <span className="font-semibold">{MONTHS_FULL[calMonth]} {calYear}</span>
+                    <button onClick={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y+1); } else setCalMonth(m => m+1); setCalSelected(null); }} className="p-2 rounded-xl hover:bg-secondary transition-colors"><Icon name="ChevronRight" size={18} /></button>
+                  </div>
+                  <div className="grid grid-cols-7 gap-1 mb-1">
+                    {DAYS_SHORT.map(d => <div key={d} className="text-center text-xs text-muted-foreground py-1 font-medium">{d}</div>)}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1">
+                    {cells.map((day, i) => {
+                      if (!day) return <div key={i} />;
+                      const dKey = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                      const dayLeads = leadsByDay[dKey] || [];
+                      const isToday = new Date().getDate() === day && new Date().getMonth() === calMonth && new Date().getFullYear() === calYear;
+                      const isSel = selKey === dKey;
+                      return (
+                        <button key={day} onClick={() => setCalSelected(isSel ? null : dKey)}
+                          className={`relative min-h-[52px] rounded-xl p-1.5 text-left transition-all border-2 ${isSel ? 'border-primary bg-primary/5' : dayLeads.length > 0 ? 'border-border hover:border-primary/40 bg-secondary/30' : 'border-transparent hover:bg-secondary/50'}`}>
+                          <span className={`text-xs font-semibold block mb-1 ${isToday ? 'text-primary' : 'text-foreground'}`}>{day}</span>
+                          {dayLeads.slice(0,3).map(l => (
+                            <div key={l.id} className={`text-[10px] leading-tight px-1 py-0.5 rounded mb-0.5 truncate ${STATUS_COLORS[l.status]}`}>
+                              {l.name || 'Без имени'}
+                            </div>
+                          ))}
+                          {dayLeads.length > 3 && <div className="text-[10px] text-muted-foreground px-1">+{dayLeads.length - 3}</div>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {selLeads.length > 0 && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-muted-foreground">
+                      Заявки на {selKey ? `${selKey.split('-')[2]}.${selKey.split('-')[1]}.${selKey.split('-')[0]}` : ''}
+                    </p>
+                    {selLeads.map(lead => (
+                      <div key={lead.id} className="bg-card border border-border rounded-2xl p-5">
+                        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-semibold">{lead.name || 'Без имени'}</span>
+                              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[lead.status]}`}>{STATUS_LABELS[lead.status]}</span>
+                              <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full">{SOURCE_LABELS[lead.source] || lead.source}</span>
+                            </div>
+                            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-sm">
+                              {lead.phone && <div className="flex items-center gap-2"><Icon name="Phone" size={14} className="text-muted-foreground" /><a href={`tel:${lead.phone}`} className="text-primary hover:underline">{lead.phone}</a></div>}
+                              {lead.appointed_at && <div className="flex items-center gap-2 sm:col-span-2"><Icon name="CalendarCheck" size={14} className="text-primary" /><span className="font-medium text-primary">{lead.appointed_at}</span></div>}
+                              {lead.address && <div className="flex items-center gap-2 sm:col-span-2"><Icon name="MapPin" size={14} className="text-muted-foreground" /><span>{lead.address}</span></div>}
+                              {lead.furniture && <div className="flex items-center gap-2 sm:col-span-2"><Icon name="Sofa" size={14} className="text-muted-foreground" /><span>{lead.furniture}</span></div>}
+                            </div>
+                          </div>
+                          <div className="flex flex-row sm:flex-col gap-1.5 flex-shrink-0">
+                            {Object.entries(STATUS_LABELS).map(([key, label]) => (
+                              <button key={key} onClick={() => updateStatus(lead.id, key)}
+                                className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-colors whitespace-nowrap ${lead.status === key ? `${STATUS_COLORS[key]} ring-1 ring-current` : 'bg-secondary hover:bg-secondary/80 text-muted-foreground'}`}>
+                                {label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+          {crmView === 'list' && leadsLoading ? (
             <div className="flex items-center justify-center py-20 text-muted-foreground">
               <Icon name="Loader2" size={24} className="animate-spin mr-2" /> Загрузка...
             </div>
-          ) : filtered.length === 0 ? (
+          ) : crmView === 'list' && filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-2">
               <Icon name="Inbox" size={36} />
               <p>{leads.length === 0 ? 'Заявок пока нет' : 'Ничего не найдено'}</p>
             </div>
-          ) : (
+          ) : crmView === 'list' ? (
             <div className="space-y-3">
               {filtered.map((lead) => (
                 <div key={lead.id} className="bg-card border border-border rounded-2xl p-5">
@@ -445,7 +557,7 @@ export default function Admin() {
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </div>
       )}
 
