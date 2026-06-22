@@ -3,6 +3,10 @@ import os
 import psycopg2
 import psycopg2.extras
 
+WORK_START = 9
+WORK_END = 17
+BLOCK_HOURS = 2
+
 CORS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -21,6 +25,36 @@ def handler(event: dict, context) -> dict:
 
     params = event.get('queryStringParameters') or {}
     scope = params.get('scope', 'leads')
+
+    # Публичный доступ к занятым слотам
+    if scope == 'slots' and event.get('httpMethod') == 'GET':
+        date_str = params.get('date', '')
+        if not date_str:
+            return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'date required'})}
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT appointed_at FROM leads WHERE appointed_at LIKE %s AND status != 'cancelled'",
+            (f'%{date_str}%',)
+        )
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        booked_hours = set()
+        for (appointed_at,) in rows:
+            if not appointed_at:
+                continue
+            try:
+                parts = appointed_at.strip().split(' в ')
+                hour = int(parts[1].split(':')[0])
+                for delta in range(-BLOCK_HOURS, BLOCK_HOURS + 1):
+                    blocked = hour + delta
+                    if WORK_START <= blocked <= WORK_END:
+                        booked_hours.add(blocked)
+            except Exception:
+                continue
+        busy_slots = [f'{h:02d}:00' for h in sorted(booked_hours)]
+        return {'statusCode': 200, 'headers': CORS, 'body': json.dumps({'busy': busy_slots})}
 
     # Публичный доступ к услугам (для главной страницы)
     if scope == 'services' and event.get('httpMethod') == 'GET' and not params.get('token'):

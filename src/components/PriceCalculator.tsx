@@ -54,7 +54,8 @@ function formatPrice(priceStr: string): string {
 
 const MONTHS = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const DAYS_SHORT = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-const TIME_SLOTS = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
+const TIME_SLOTS = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00'];
+const SLOTS_URL = 'https://functions.poehali.dev/69cf7aba-5592-425b-b604-218abbaf0e1d';
 
 function Calendar({ onSelect }: { onSelect: (date: Date) => void }) {
   const today = new Date();
@@ -205,6 +206,9 @@ export default function PriceCalculator() {
   // Шаг 4 — запись
   const [bookingDate, setBookingDate] = useState<Date | null>(null);
   const [bookingTime, setBookingTime] = useState('');
+  const [busySlots, setBusySlots] = useState<string[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [busyTooltip, setBusyTooltip] = useState('');
   // Шаг 5 — контакты
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -653,22 +657,62 @@ export default function PriceCalculator() {
             </div>
           )}
           <div className="bg-secondary/30 rounded-2xl p-4 mb-4">
-            <Calendar onSelect={setBookingDate} />
+            <Calendar onSelect={(d) => {
+              setBookingDate(d);
+              setBookingTime('');
+              setBusyTooltip('');
+              const dateStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+              setSlotsLoading(true);
+              fetch(`${SLOTS_URL}?scope=slots&date=${dateStr}`)
+                .then(r => r.json())
+                .then(data => setBusySlots(data.busy || []))
+                .catch(() => setBusySlots([]))
+                .finally(() => setSlotsLoading(false));
+            }} />
           </div>
           {bookingDate && (
             <div>
               <p className="font-semibold text-sm mb-2">Выберите время</p>
-              <div className="grid grid-cols-4 gap-2 mb-4">
-                {TIME_SLOTS.map(t => (
-                  <button
-                    key={t}
-                    onClick={() => setBookingTime(t)}
-                    className={`py-2 rounded-xl text-sm font-medium border-2 transition-all ${
-                      bookingTime === t ? 'border-primary bg-primary/5 text-primary' : 'border-border hover:border-primary/40'
-                    }`}
-                  >{t}</button>
-                ))}
-              </div>
+              {slotsLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+                  <Icon name="Loader2" size={14} className="animate-spin" /> Загрузка доступного времени...
+                </div>
+              ) : (
+                <div className="relative">
+                  <div className="grid grid-cols-4 gap-2 mb-1">
+                    {TIME_SLOTS.map(t => {
+                      const isBusy = busySlots.includes(t);
+                      const isSel = bookingTime === t;
+                      return (
+                        <div key={t} className="relative">
+                          <button
+                            onClick={() => {
+                              if (isBusy) {
+                                setBusyTooltip(t);
+                                setTimeout(() => setBusyTooltip(''), 3000);
+                              } else {
+                                setBookingTime(t);
+                                setBusyTooltip('');
+                              }
+                            }}
+                            className={`w-full py-2 rounded-xl text-sm font-medium border-2 transition-all ${
+                              isSel ? 'border-primary bg-primary/5 text-primary' :
+                              isBusy ? 'border-border/30 text-muted-foreground/40 bg-secondary/30 cursor-pointer' :
+                              'border-border hover:border-primary/40'
+                            }`}
+                          >{t}</button>
+                          {isBusy && busyTooltip === t && (
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10 bg-foreground text-background text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
+                              Время занято — выберите другое
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           <div className="flex gap-3">
