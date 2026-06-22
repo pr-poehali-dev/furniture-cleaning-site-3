@@ -233,8 +233,12 @@ export default function Admin() {
   }, {});
 
   const parseLeadSum = (l: Lead): number => {
-    const matches = l.furniture?.match(/\([\d\s]+₽\)/g) || [];
-    return matches.reduce((s, m) => s + parseInt(m.replace(/\D/g, ''), 10), 0);
+    const matches = l.furniture?.match(/\(−?[\d\s]+₽\)/g) || [];
+    return matches.reduce((s, m) => {
+      const negative = m.includes('−');
+      const num = parseInt(m.replace(/\D/g, ''), 10);
+      return s + (negative ? -num : num);
+    }, 0);
   };
 
   // Finance filters
