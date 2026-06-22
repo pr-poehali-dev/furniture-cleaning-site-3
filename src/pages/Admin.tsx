@@ -59,7 +59,7 @@ export default function Admin() {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  const [tab, setTab] = useState<'crm' | 'services'>('crm');
+  const [tab, setTab] = useState<'crm' | 'services' | 'finance'>('crm');
 
   // CRM
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -227,6 +227,17 @@ export default function Admin() {
     return acc;
   }, {});
 
+  const parseLeadSum = (l: Lead): number => {
+    const matches = l.furniture?.match(/\([\d\s]+₽\)/g) || [];
+    return matches.reduce((s, m) => s + parseInt(m.replace(/\D/g, ''), 10), 0);
+  };
+
+  const financeStats = Object.keys(STATUS_LABELS).map((key) => {
+    const statusLeads = leads.filter(l => l.status === key);
+    const total = statusLeads.reduce((sum, l) => sum + parseLeadSum(l), 0);
+    return { key, count: statusLeads.length, total };
+  });
+
   return (
     <div className="min-h-screen bg-secondary/30">
       {/* Header */}
@@ -255,6 +266,15 @@ export default function Admin() {
             >
               <Icon name="ListChecks" size={16} />
               Услуги и цены
+            </button>
+            <button
+              onClick={() => setTab('finance')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                tab === 'finance' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary text-muted-foreground'
+              }`}
+            >
+              <Icon name="CircleDollarSign" size={16} />
+              Финансы
             </button>
           </div>
           <div className="flex items-center gap-2">
@@ -509,6 +529,71 @@ export default function Admin() {
                 </div>
               ))}
             </div>
+          )}
+        </div>
+      )}
+
+      {/* Finance Tab */}
+      {tab === 'finance' && (
+        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+          <div>
+            <h2 className="text-lg font-bold mb-1">Финансы</h2>
+            <p className="text-sm text-muted-foreground">Сводка по заказам и суммам в разбивке по статусам</p>
+          </div>
+
+          {leadsLoading ? (
+            <div className="flex items-center justify-center py-20 text-muted-foreground">
+              <Icon name="Loader2" size={24} className="animate-spin mr-2" /> Загрузка...
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {financeStats.map(({ key, count, total }) => {
+                  const colorMap: Record<string, string> = {
+                    new: 'border-blue-200 bg-blue-50',
+                    in_progress: 'border-yellow-200 bg-yellow-50',
+                    done: 'border-green-200 bg-green-50',
+                    cancelled: 'border-gray-200 bg-gray-50',
+                  };
+                  const iconMap: Record<string, string> = {
+                    new: 'Inbox',
+                    in_progress: 'Clock',
+                    done: 'CircleCheck',
+                    cancelled: 'CircleX',
+                  };
+                  return (
+                    <div key={key} className={`rounded-2xl border-2 p-5 ${colorMap[key]}`}>
+                      <div className="flex items-center gap-2 mb-4">
+                        <Icon name={iconMap[key]} size={18} className="text-muted-foreground" />
+                        <span className="font-semibold text-sm">{STATUS_LABELS[key]}</span>
+                      </div>
+                      <div className="flex justify-between items-end">
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-0.5">Заказов</p>
+                          <p className="text-3xl font-bold">{count}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground mb-0.5">Сумма</p>
+                          <p className="text-2xl font-bold">
+                            {total > 0 ? `${total.toLocaleString('ru-RU')} ₽` : '—'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="bg-card border border-border rounded-2xl p-5">
+                <p className="text-xs text-muted-foreground mb-1">Итого выручка (выполненные заказы)</p>
+                <p className="text-3xl font-bold text-green-600">
+                  {(financeStats.find(s => s.key === 'done')?.total || 0).toLocaleString('ru-RU')} ₽
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  В работе ещё {(financeStats.find(s => s.key === 'in_progress')?.total || 0).toLocaleString('ru-RU')} ₽ · Новых {(financeStats.find(s => s.key === 'new')?.total || 0).toLocaleString('ru-RU')} ₽
+                </p>
+              </div>
+            </>
           )}
         </div>
       )}
