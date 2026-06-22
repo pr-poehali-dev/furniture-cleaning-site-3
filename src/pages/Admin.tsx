@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const AUTH_URL = 'https://functions.poehali.dev/5284cfbd-315b-46e6-9070-7bd4e724c3b9';
 const LEADS_URL = 'https://functions.poehali.dev/69cf7aba-5592-425b-b604-218abbaf0e1d';
@@ -237,6 +238,19 @@ export default function Admin() {
     const total = statusLeads.reduce((sum, l) => sum + parseLeadSum(l), 0);
     return { key, count: statusLeads.length, total };
   });
+
+  const MONTH_NAMES = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+  const monthlyData = (() => {
+    const map: Record<string, { month: string; выручка: number; заказов: number }> = {};
+    leads.filter(l => l.status === 'done').forEach(l => {
+      const d = new Date(l.created_at);
+      const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2,'0')}`;
+      if (!map[key]) map[key] = { month: `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`, выручка: 0, заказов: 0 };
+      map[key].выручка += parseLeadSum(l);
+      map[key].заказов += 1;
+    });
+    return Object.entries(map).sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v);
+  })();
 
   return (
     <div className="min-h-screen bg-secondary/30">
@@ -592,6 +606,27 @@ export default function Admin() {
                 <p className="text-xs text-muted-foreground mt-2">
                   В работе ещё {(financeStats.find(s => s.key === 'in_progress')?.total || 0).toLocaleString('ru-RU')} ₽ · Новых {(financeStats.find(s => s.key === 'new')?.total || 0).toLocaleString('ru-RU')} ₽
                 </p>
+              </div>
+
+              <div className="bg-card border border-border rounded-2xl p-5">
+                <p className="font-semibold text-sm mb-1">Выручка по месяцам</p>
+                <p className="text-xs text-muted-foreground mb-5">Только выполненные заказы</p>
+                {monthlyData.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-8 text-center">Пока нет выполненных заказов</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={220}>
+                    <BarChart data={monthlyData} barSize={32}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                      <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} tickFormatter={v => `${(v/1000).toFixed(0)}к`} />
+                      <Tooltip
+                        formatter={(value: number) => [`${value.toLocaleString('ru-RU')} ₽`, 'Выручка']}
+                        contentStyle={{ borderRadius: '12px', border: '1px solid hsl(var(--border))', fontSize: 13 }}
+                      />
+                      <Bar dataKey="выручка" fill="hsl(var(--primary))" radius={[6,6,0,0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </>
           )}
