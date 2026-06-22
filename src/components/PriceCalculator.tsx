@@ -682,12 +682,21 @@ export default function PriceCalculator() {
                   <div className="grid grid-cols-4 gap-2 mb-1">
                     {TIME_SLOTS.map(t => {
                       const isBusy = busySlots.includes(t);
+                      const now = new Date();
+                      const isToday = bookingDate
+                        ? bookingDate.getFullYear() === now.getFullYear() &&
+                          bookingDate.getMonth() === now.getMonth() &&
+                          bookingDate.getDate() === now.getDate()
+                        : false;
+                      const slotHour = parseInt(t.split(':')[0], 10);
+                      const isPast = isToday && slotHour <= now.getHours();
+                      const isDisabled = isBusy || isPast;
                       const isSel = bookingTime === t;
                       return (
                         <div key={t} className="relative">
                           <button
                             onClick={() => {
-                              if (isBusy) {
+                              if (isDisabled) {
                                 setBusyTooltip(t);
                                 setTimeout(() => setBusyTooltip(''), 3000);
                               } else {
@@ -697,13 +706,13 @@ export default function PriceCalculator() {
                             }}
                             className={`w-full py-2 rounded-xl text-sm font-medium border-2 transition-all ${
                               isSel ? 'border-primary bg-primary/5 text-primary' :
-                              isBusy ? 'border-border/30 text-muted-foreground/40 bg-secondary/30 cursor-pointer' :
+                              isDisabled ? 'border-border/30 text-muted-foreground/40 bg-secondary/30 cursor-pointer' :
                               'border-border hover:border-primary/40'
                             }`}
                           >{t}</button>
-                          {isBusy && busyTooltip === t && (
+                          {isDisabled && busyTooltip === t && (
                             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10 bg-foreground text-background text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
-                              Время занято — выберите другое
+                              {isPast && !isBusy ? 'Это время уже прошло' : 'Время занято — выберите другое'}
                               <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground" />
                             </div>
                           )}
