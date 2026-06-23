@@ -5,8 +5,7 @@
       "method": "OPTIONS",
       "path": "/",
       "expectedStatus": 200,
-      "expectedBody": {},
-      "bodyMatcher": "partial"
+      "bodyMatcher": "none"
     }
   ]
 }

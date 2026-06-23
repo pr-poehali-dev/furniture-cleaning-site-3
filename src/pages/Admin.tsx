@@ -42,12 +42,21 @@ interface Lead {
   created_at: string;
 }
 
+const SERVICE_CATEGORIES: Record<string, string> = {
+  sofas: 'Диваны',
+  mattresses: 'Матрасы',
+  other: 'Другая мебель',
+  additional: 'Дополнительные услуги',
+  packages: 'Пакетные предложения',
+};
+
 interface Service {
   id: number;
   name: string;
   price: string;
   sort_order: number;
   is_active: boolean;
+  category: string;
 }
 
 function formatDate(iso: string) {
@@ -76,7 +85,7 @@ export default function Admin() {
   const [services, setServices] = useState<Service[]>([]);
   const [servicesLoading, setServicesLoading] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [newService, setNewService] = useState({ name: '', price: '' });
+  const [newService, setNewService] = useState({ name: '', price: '', category: 'other' });
   const [savingService, setSavingService] = useState(false);
   const [addingNew, setAddingNew] = useState(false);
 
@@ -152,9 +161,9 @@ export default function Admin() {
       await fetch(`${LEADS_URL}?scope=services&token=${encodeURIComponent(token)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newService.name, price: newService.price, sort_order: services.length }),
+        body: JSON.stringify({ name: newService.name, price: newService.price, category: newService.category, sort_order: services.length }),
       });
-      setNewService({ name: '', price: '' });
+      setNewService({ name: '', price: '', category: 'other' });
       setAddingNew(false);
       fetchServices(token);
     } finally {
@@ -578,7 +587,7 @@ export default function Admin() {
           {addingNew && (
             <div className="bg-card border-2 border-primary/40 rounded-2xl p-5 space-y-3">
               <p className="font-semibold text-sm">Новая услуга</p>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Input
                   placeholder="Название (например: Чистка дивана)"
                   value={newService.name}
@@ -590,14 +599,23 @@ export default function Admin() {
                   placeholder="Цена (например: от 3 500 ₽)"
                   value={newService.price}
                   onChange={(e) => setNewService((s) => ({ ...s, price: e.target.value }))}
-                  className="rounded-xl w-52"
+                  className="rounded-xl w-48"
                 />
+                <select
+                  value={newService.category}
+                  onChange={(e) => setNewService((s) => ({ ...s, category: e.target.value }))}
+                  className="rounded-xl border border-border bg-background text-sm px-3 h-10 w-52"
+                >
+                  {Object.entries(SERVICE_CATEGORIES).map(([k, v]) => (
+                    <option key={k} value={k}>{v}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-2">
                 <Button onClick={createService} disabled={savingService || !newService.name || !newService.price} className="rounded-xl gap-1">
                   <Icon name="Check" size={14} /> {savingService ? 'Сохраняю...' : 'Сохранить'}
                 </Button>
-                <Button variant="ghost" onClick={() => { setAddingNew(false); setNewService({ name: '', price: '' }); }} className="rounded-xl">
+                <Button variant="ghost" onClick={() => { setAddingNew(false); setNewService({ name: '', price: '', category: 'other' }); }} className="rounded-xl">
                   Отмена
                 </Button>
               </div>
@@ -614,12 +632,24 @@ export default function Admin() {
               <p>Услуг пока нет — добавьте первую</p>
             </div>
           ) : (
-            <div className="space-y-2">
-              {services.map((s) => (
+            <div className="space-y-6">
+              {Object.entries(SERVICE_CATEGORIES).map(([catKey, catLabel]) => {
+                const catServices = services.filter(s => (s.category || 'other') === catKey);
+                return (
+                  <div key={catKey}>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">{catLabel}</h3>
+                      <span className="text-xs bg-secondary text-muted-foreground px-2 py-0.5 rounded-full">{catServices.length}</span>
+                    </div>
+                    {catServices.length === 0 ? (
+                      <p className="text-sm text-muted-foreground/60 py-2 pl-1">Нет услуг в этой категории</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {catServices.map((s) => (
                 <div key={s.id} className={`bg-card border rounded-2xl p-4 transition-opacity ${!s.is_active ? 'opacity-50' : ''} ${editingService?.id === s.id ? 'border-primary/40 border-2' : 'border-border'}`}>
                   {editingService?.id === s.id ? (
                     <div className="space-y-3">
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-3">
                         <Input
                           value={editingService.name}
                           onChange={(e) => setEditingService((prev) => prev ? { ...prev, name: e.target.value } : prev)}
@@ -629,8 +659,17 @@ export default function Admin() {
                         <Input
                           value={editingService.price}
                           onChange={(e) => setEditingService((prev) => prev ? { ...prev, price: e.target.value } : prev)}
-                          className="rounded-xl w-52"
+                          className="rounded-xl w-48"
                         />
+                        <select
+                          value={editingService.category || 'other'}
+                          onChange={(e) => setEditingService((prev) => prev ? { ...prev, category: e.target.value } : prev)}
+                          className="rounded-xl border border-border bg-background text-sm px-3 h-10 w-52"
+                        >
+                          {Object.entries(SERVICE_CATEGORIES).map(([k, v]) => (
+                            <option key={k} value={k}>{v}</option>
+                          ))}
+                        </select>
                       </div>
                       <div className="flex items-center gap-3">
                         <label className="flex items-center gap-2 text-sm cursor-pointer">
@@ -676,7 +715,12 @@ export default function Admin() {
                     </div>
                   )}
                 </div>
-              ))}
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

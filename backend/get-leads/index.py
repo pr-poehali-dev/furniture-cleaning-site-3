@@ -60,7 +60,7 @@ def handler(event: dict, context) -> dict:
     if scope == 'services' and event.get('httpMethod') == 'GET' and not params.get('token'):
         conn = psycopg2.connect(os.environ['DATABASE_URL'])
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("SELECT id, name, price, sort_order, is_active FROM services WHERE is_active = TRUE ORDER BY sort_order ASC, id ASC")
+        cur.execute("SELECT id, name, price, sort_order, is_active, category FROM services WHERE is_active = TRUE ORDER BY sort_order ASC, id ASC")
         rows = [dict(r) for r in cur.fetchall()]
         cur.close()
         conn.close()
@@ -93,13 +93,14 @@ def handler(event: dict, context) -> dict:
             name = body.get('name', '').strip()
             price = body.get('price', '').strip()
             sort_order = body.get('sort_order', 0)
+            category = body.get('category', 'other').strip()
             if not name or not price:
                 cur.close()
                 conn.close()
                 return {'statusCode': 400, 'headers': CORS, 'body': json.dumps({'error': 'name and price required'})}
             cur.execute(
-                "INSERT INTO services (name, price, sort_order) VALUES (%s, %s, %s) RETURNING *",
-                (name, price, sort_order)
+                "INSERT INTO services (name, price, sort_order, category) VALUES (%s, %s, %s, %s) RETURNING *",
+                (name, price, sort_order, category)
             )
             row = serialize_service(cur.fetchone())
             conn.commit()
@@ -113,9 +114,10 @@ def handler(event: dict, context) -> dict:
             price = body.get('price', '').strip()
             is_active = body.get('is_active', True)
             sort_order = body.get('sort_order', 0)
+            category = body.get('category', 'other').strip()
             cur.execute(
-                "UPDATE services SET name=%s, price=%s, is_active=%s, sort_order=%s WHERE id=%s",
-                (name, price, is_active, sort_order, service_id)
+                "UPDATE services SET name=%s, price=%s, is_active=%s, sort_order=%s, category=%s WHERE id=%s",
+                (name, price, is_active, sort_order, category, service_id)
             )
             conn.commit()
             cur.close()
