@@ -69,7 +69,7 @@ export default function Admin() {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
-  const [tab, setTab] = useState<'crm' | 'services' | 'finance'>('crm');
+  const [tab, setTab] = useState<'crm' | 'services' | 'finance' | 'ads'>('crm');
 
   // CRM
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -92,6 +92,49 @@ export default function Admin() {
   // Finance
   const [finDateFrom, setFinDateFrom] = useState('');
   const [finDateTo, setFinDateTo] = useState('');
+
+  // Ads
+  interface AdChannel {
+    id: number;
+    name: string;
+    slug: string;
+    budget: number;
+    impressions: number;
+    leads_count: number;
+    leads_planned: number;
+    sales: number;
+    sort_order: number;
+  }
+  const [adChannels, setAdChannels] = useState<AdChannel[]>([]);
+  const [adsLoading, setAdsLoading] = useState(false);
+  const [editingAd, setEditingAd] = useState<AdChannel | null>(null);
+  const [savingAd, setSavingAd] = useState(false);
+
+  const fetchAds = useCallback(async (t: string) => {
+    setAdsLoading(true);
+    try {
+      const res = await fetch(`${LEADS_URL}?scope=ads&token=${encodeURIComponent(t)}`);
+      const data = await res.json();
+      setAdChannels(data.channels || []);
+    } finally {
+      setAdsLoading(false);
+    }
+  }, []);
+
+  const saveAd = async (ch: AdChannel) => {
+    setSavingAd(true);
+    try {
+      await fetch(`${LEADS_URL}?scope=ads&token=${encodeURIComponent(token)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ch),
+      });
+      setEditingAd(null);
+      fetchAds(token);
+    } finally {
+      setSavingAd(false);
+    }
+  };
 
   const fetchLeads = useCallback(async (t: string) => {
     setLeadsLoading(true);
@@ -120,8 +163,9 @@ export default function Admin() {
     if (token) {
       fetchLeads(token);
       fetchServices(token);
+      fetchAds(token);
     }
-  }, [token, fetchLeads, fetchServices]);
+  }, [token, fetchLeads, fetchServices, fetchAds]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -326,6 +370,15 @@ export default function Admin() {
               <Icon name="CircleDollarSign" size={16} />
               Финансы
             </button>
+            <button
+              onClick={() => setTab('ads')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                tab === 'ads' ? 'bg-primary text-primary-foreground' : 'hover:bg-secondary text-muted-foreground'
+              }`}
+            >
+              <Icon name="Megaphone" size={16} />
+              Реклама
+            </button>
           </div>
           <div className="flex items-center gap-2">
             {tab === 'crm' && (
@@ -335,6 +388,11 @@ export default function Admin() {
             )}
             {tab === 'services' && (
               <Button variant="ghost" size="sm" onClick={() => fetchServices(token)} className="gap-1">
+                <Icon name="RefreshCw" size={14} /> Обновить
+              </Button>
+            )}
+            {tab === 'ads' && (
+              <Button variant="ghost" size="sm" onClick={() => fetchAds(token)} className="gap-1">
                 <Icon name="RefreshCw" size={14} /> Обновить
               </Button>
             )}
@@ -839,6 +897,175 @@ export default function Admin() {
                 )}
               </div>
             </>
+          )}
+        </div>
+      )}
+
+      {/* Ads Tab */}
+      {tab === 'ads' && (
+        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+          <div>
+            <h2 className="text-lg font-bold mb-1">Рекламные каналы</h2>
+            <p className="text-sm text-muted-foreground">Бюджет, заявки, продажи и эффективность по каждому каналу</p>
+          </div>
+
+          {adsLoading ? (
+            <div className="flex items-center justify-center py-20 text-muted-foreground">
+              <Icon name="Loader2" size={24} className="animate-spin mr-2" /> Загрузка...
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {/* Сводная таблица */}
+              <div className="bg-card border border-border rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-secondary/40">
+                        <th className="text-left px-5 py-3 font-semibold text-muted-foreground whitespace-nowrap">Канал</th>
+                        <th className="text-right px-4 py-3 font-semibold text-muted-foreground whitespace-nowrap">Бюджет, ₽</th>
+                        <th className="text-right px-4 py-3 font-semibold text-muted-foreground whitespace-nowrap">Показы</th>
+                        <th className="text-right px-4 py-3 font-semibold text-muted-foreground whitespace-nowrap">Заявки факт</th>
+                        <th className="text-right px-4 py-3 font-semibold text-muted-foreground whitespace-nowrap">Заявки план</th>
+                        <th className="text-right px-4 py-3 font-semibold text-muted-foreground whitespace-nowrap">Конверсия</th>
+                        <th className="text-right px-4 py-3 font-semibold text-muted-foreground whitespace-nowrap">Цена заявки</th>
+                        <th className="text-right px-4 py-3 font-semibold text-muted-foreground whitespace-nowrap">Продажи</th>
+                        <th className="text-right px-4 py-3 font-semibold text-muted-foreground whitespace-nowrap">Цена продажи</th>
+                        <th className="px-3 py-3"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adChannels.map((ch) => {
+                        const convRate = ch.impressions > 0 ? ((ch.leads_count / ch.impressions) * 100).toFixed(2) : '—';
+                        const cpl = ch.leads_count > 0 ? Math.round(ch.budget / ch.leads_count) : null;
+                        const cps = ch.sales > 0 ? Math.round(ch.budget / ch.sales) : null;
+                        const isEditing = editingAd?.id === ch.id;
+
+                        if (isEditing && editingAd) {
+                          return (
+                            <tr key={ch.id} className="border-b border-border bg-primary/5">
+                              <td className="px-5 py-3 font-semibold whitespace-nowrap">{ch.name}</td>
+                              <td className="px-2 py-2">
+                                <input type="number" min="0" value={editingAd.budget} onChange={e => setEditingAd(p => p ? { ...p, budget: +e.target.value } : p)}
+                                  className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm" />
+                              </td>
+                              <td className="px-2 py-2">
+                                <input type="number" min="0" value={editingAd.impressions} onChange={e => setEditingAd(p => p ? { ...p, impressions: +e.target.value } : p)}
+                                  className="w-24 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm" />
+                              </td>
+                              <td className="px-2 py-2">
+                                <input type="number" min="0" value={editingAd.leads_count} onChange={e => setEditingAd(p => p ? { ...p, leads_count: +e.target.value } : p)}
+                                  className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm" />
+                              </td>
+                              <td className="px-2 py-2">
+                                <input type="number" min="0" value={editingAd.leads_planned} onChange={e => setEditingAd(p => p ? { ...p, leads_planned: +e.target.value } : p)}
+                                  className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm" />
+                              </td>
+                              <td className="px-4 py-3 text-right text-muted-foreground">—</td>
+                              <td className="px-4 py-3 text-right text-muted-foreground">—</td>
+                              <td className="px-2 py-2">
+                                <input type="number" min="0" value={editingAd.sales} onChange={e => setEditingAd(p => p ? { ...p, sales: +e.target.value } : p)}
+                                  className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm" />
+                              </td>
+                              <td className="px-4 py-3 text-right text-muted-foreground">—</td>
+                              <td className="px-3 py-2">
+                                <div className="flex gap-1">
+                                  <button onClick={() => saveAd(editingAd)} disabled={savingAd}
+                                    className="p-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+                                    <Icon name={savingAd ? 'Loader2' : 'Check'} size={14} className={savingAd ? 'animate-spin' : ''} />
+                                  </button>
+                                  <button onClick={() => setEditingAd(null)}
+                                    className="p-1.5 rounded-lg hover:bg-secondary transition-colors text-muted-foreground">
+                                    <Icon name="X" size={14} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        return (
+                          <tr key={ch.id} className="border-b border-border last:border-0 hover:bg-secondary/30 transition-colors">
+                            <td className="px-5 py-4 font-semibold whitespace-nowrap">{ch.name}</td>
+                            <td className="px-4 py-4 text-right">{ch.budget > 0 ? ch.budget.toLocaleString('ru-RU') : '—'}</td>
+                            <td className="px-4 py-4 text-right">{ch.impressions > 0 ? ch.impressions.toLocaleString('ru-RU') : '—'}</td>
+                            <td className="px-4 py-4 text-right">
+                              <span className="font-semibold">{ch.leads_count > 0 ? ch.leads_count : '—'}</span>
+                            </td>
+                            <td className="px-4 py-4 text-right">
+                              {ch.leads_planned > 0 ? (
+                                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ch.leads_count >= ch.leads_planned ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                  {ch.leads_planned}
+                                </span>
+                              ) : '—'}
+                            </td>
+                            <td className="px-4 py-4 text-right text-muted-foreground">{ch.impressions > 0 ? `${convRate}%` : '—'}</td>
+                            <td className="px-4 py-4 text-right">{cpl != null ? `${cpl.toLocaleString('ru-RU')} ₽` : '—'}</td>
+                            <td className="px-4 py-4 text-right font-semibold">{ch.sales > 0 ? ch.sales : '—'}</td>
+                            <td className="px-4 py-4 text-right">{cps != null ? `${cps.toLocaleString('ru-RU')} ₽` : '—'}</td>
+                            <td className="px-3 py-4">
+                              <button onClick={() => setEditingAd({ ...ch })}
+                                className="p-2 rounded-xl hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground">
+                                <Icon name="Pencil" size={15} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    {/* Итоговая строка */}
+                    {adChannels.length > 0 && (() => {
+                      const totBudget = adChannels.reduce((s, c) => s + c.budget, 0);
+                      const totLeads = adChannels.reduce((s, c) => s + c.leads_count, 0);
+                      const totPlanned = adChannels.reduce((s, c) => s + c.leads_planned, 0);
+                      const totSales = adChannels.reduce((s, c) => s + c.sales, 0);
+                      const totCpl = totLeads > 0 ? Math.round(totBudget / totLeads) : null;
+                      const totCps = totSales > 0 ? Math.round(totBudget / totSales) : null;
+                      return (
+                        <tfoot>
+                          <tr className="bg-secondary/60 font-semibold border-t-2 border-border">
+                            <td className="px-5 py-3 text-muted-foreground">Итого</td>
+                            <td className="px-4 py-3 text-right">{totBudget > 0 ? totBudget.toLocaleString('ru-RU') : '—'}</td>
+                            <td className="px-4 py-3 text-right text-muted-foreground">—</td>
+                            <td className="px-4 py-3 text-right">{totLeads > 0 ? totLeads : '—'}</td>
+                            <td className="px-4 py-3 text-right">{totPlanned > 0 ? totPlanned : '—'}</td>
+                            <td className="px-4 py-3 text-right text-muted-foreground">—</td>
+                            <td className="px-4 py-3 text-right">{totCpl != null ? `${totCpl.toLocaleString('ru-RU')} ₽` : '—'}</td>
+                            <td className="px-4 py-3 text-right">{totSales > 0 ? totSales : '—'}</td>
+                            <td className="px-4 py-3 text-right">{totCps != null ? `${totCps.toLocaleString('ru-RU')} ₽` : '—'}</td>
+                            <td />
+                          </tr>
+                        </tfoot>
+                      );
+                    })()}
+                  </table>
+                </div>
+              </div>
+
+              {/* Карточки-подсказки */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {adChannels.map(ch => {
+                  const planPct = ch.leads_planned > 0 ? Math.min(100, Math.round((ch.leads_count / ch.leads_planned) * 100)) : null;
+                  return (
+                    <div key={ch.id} className="bg-card border border-border rounded-2xl p-4">
+                      <p className="text-xs text-muted-foreground mb-1">{ch.name}</p>
+                      <p className="text-2xl font-bold">{ch.leads_count}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">заявок</p>
+                      {planPct != null && (
+                        <div className="mt-3">
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-muted-foreground">план</span>
+                            <span className={planPct >= 100 ? 'text-green-600 font-semibold' : 'text-yellow-600 font-semibold'}>{planPct}%</span>
+                          </div>
+                          <div className="h-1.5 rounded-full bg-secondary overflow-hidden">
+                            <div className={`h-full rounded-full transition-all ${planPct >= 100 ? 'bg-green-500' : 'bg-yellow-400'}`} style={{ width: `${planPct}%` }} />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           )}
         </div>
       )}

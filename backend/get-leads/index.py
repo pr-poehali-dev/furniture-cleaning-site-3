@@ -132,6 +132,36 @@ def handler(event: dict, context) -> dict:
             conn.close()
             return {'statusCode': 200, 'headers': CORS, 'body': json.dumps({'ok': True})}
 
+    # --- РЕКЛАМНЫЕ КАНАЛЫ ---
+    if scope == 'ads':
+        if method == 'GET':
+            cur.execute("SELECT * FROM ad_channels ORDER BY sort_order ASC, id ASC")
+            rows = [dict(r) for r in cur.fetchall()]
+            for r in rows:
+                r['updated_at'] = r['updated_at'].isoformat()
+                r['budget'] = float(r['budget'])
+            cur.close()
+            conn.close()
+            return {'statusCode': 200, 'headers': CORS, 'body': json.dumps({'channels': rows})}
+
+        body = json.loads(event.get('body') or '{}')
+
+        if method == 'PUT':
+            channel_id = body.get('id')
+            budget = float(body.get('budget', 0))
+            impressions = int(body.get('impressions', 0))
+            leads_count = int(body.get('leads_count', 0))
+            leads_planned = int(body.get('leads_planned', 0))
+            sales = int(body.get('sales', 0))
+            cur.execute(
+                "UPDATE ad_channels SET budget=%s, impressions=%s, leads_count=%s, leads_planned=%s, sales=%s, updated_at=NOW() WHERE id=%s",
+                (budget, impressions, leads_count, leads_planned, sales, channel_id)
+            )
+            conn.commit()
+            cur.close()
+            conn.close()
+            return {'statusCode': 200, 'headers': CORS, 'body': json.dumps({'ok': True})}
+
     # --- ЗАЯВКИ (leads) ---
     if method == 'POST':
         body = json.loads(event.get('body') or '{}')
