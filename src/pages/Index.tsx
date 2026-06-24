@@ -136,13 +136,13 @@ function BeforeAfterSlider({ before, after, item }: { before: string; after: str
   return (
     <div
       ref={containerRef}
-      className="relative aspect-[4/3] overflow-hidden select-none cursor-col-resize"
+      className="relative aspect-square overflow-hidden select-none cursor-col-resize"
       onMouseDown={(e) => { dragging.current = true; calcPos(e.clientX); }}
       onTouchStart={(e) => { dragging.current = true; calcPos(e.touches[0].clientX); }}
     >
-      <img src={after} alt="После чистки" className="absolute inset-0 w-full h-full object-contain" />
+      <img src={after} alt="После чистки" className="absolute inset-0 w-full h-full object-cover" />
       <div className="absolute inset-0 overflow-hidden" style={{ width: `${pos}%` }}>
-        <img src={before} alt="До чистки" className="absolute inset-0 w-full h-full object-contain" style={{ width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '100%', maxWidth: 'none' }} />
+        <img src={before} alt="До чистки" className="absolute inset-0 w-full h-full object-cover" style={{ width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '100%', maxWidth: 'none' }} />
       </div>
       <div className="absolute inset-y-0 flex items-center pointer-events-none" style={{ left: `calc(${pos}% - 1px)` }}>
         <div className="w-0.5 h-full bg-white shadow-lg" />
