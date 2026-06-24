@@ -85,9 +85,9 @@ const REVIEWS = [
     location: 'Москва, Химки',
     text: 'Заказала чистку матраса — даже не ожидала такого результата. Запах пропал полностью, цвет обновился. Дети теперь спят спокойно. Буду заказывать каждый год.',
     rating: 5,
-    before: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/9425f0dc-fe46-487b-bfc5-07150904b26d.jpg',
-    after: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/files/b7eb92aa-a295-4b0e-ba4d-3c44cdbda9fd.jpg',
-    item: 'Матрас',
+    before: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/323dbacc-a0bd-461b-b7a2-5f7b32feff66.jpg',
+    after: 'https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/f882c85c-2e31-4bd8-801d-8d08eb91d813.jpg',
+    item: 'Диван',
   },
 ];
 
