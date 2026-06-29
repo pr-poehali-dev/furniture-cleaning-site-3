@@ -585,12 +585,12 @@ const Index = () => {
           <div className="flex items-center">
             <img
               src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/de0b62e5-b681-4231-a70a-b60a28a8c0e7.png"
-              alt="Чистер"
+              alt="Чистекс"
               className="h-9 w-auto object-contain"
             />
           </div>
           <p>Выездная химчистка мебели · Москва и область</p>
-          <p>© {new Date().getFullYear()} Чистер</p>
+          <p>© {new Date().getFullYear()} Чистекс</p>
         </div>
       </footer>
 
