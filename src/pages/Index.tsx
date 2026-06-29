@@ -333,7 +333,7 @@ const Index = () => {
         <div className="container flex items-center justify-between h-16 px-4 md:px-8">
           <button onClick={() => scrollTo('hero')} className="flex items-center">
             <img
-              src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/53938927-e253-4412-bb52-def6bbd4efbb.png"
+              src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/de0b62e5-b681-4231-a70a-b60a28a8c0e7.png"
               alt="Чистекс"
               className="h-10 w-auto object-contain"
             />
@@ -584,7 +584,7 @@ const Index = () => {
         <div className="container px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-muted-foreground text-sm">
           <div className="flex items-center">
             <img
-              src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/53938927-e253-4412-bb52-def6bbd4efbb.png"
+              src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/de0b62e5-b681-4231-a70a-b60a28a8c0e7.png"
               alt="Чистер"
               className="h-9 w-auto object-contain"
             />
