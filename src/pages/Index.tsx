@@ -334,7 +334,7 @@ const Index = () => {
           <button onClick={() => scrollTo('hero')} className="flex items-center">
             <img
               src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/53938927-e253-4412-bb52-def6bbd4efbb.png"
-              alt="Чистер"
+              alt="Чистекс"
               className="h-10 w-auto object-contain"
             />
           </button>
