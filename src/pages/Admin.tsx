@@ -11,7 +11,7 @@ function SbpQr({ sum, leadId }: { sum: number; leadId: number }) {
   const [open, setOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   if (sum <= 0) return null;
-  const sbpUrl = `${SBP_PHONE} ${sum.toLocaleString('ru-RU')} руб. Заказ №${leadId} (СБП)`;
+  const sbpUrl = `${SBP_PHONE}`;
 
   const handleDownload = () => {
     const canvas = canvasRef.current?.querySelector('canvas') as HTMLCanvasElement | null;
