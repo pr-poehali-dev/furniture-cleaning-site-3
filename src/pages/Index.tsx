@@ -100,7 +100,7 @@ const CALC_ITEMS = [
   { id: 'odor',         icon: 'Wind',       label: 'Удаление запаха',price: 1500 },
 ];
 
-const TELEGRAM = 'https://t.me/+79936014901';
+const TELEGRAM = 'https://t.me/clickchist';
 const WHATSAPP = 'https://wa.me/79936014901';
 const PHONE = 'tel:+79936014901';
 
