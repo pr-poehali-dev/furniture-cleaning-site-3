@@ -100,9 +100,9 @@ const CALC_ITEMS = [
   { id: 'odor',         icon: 'Wind',       label: 'Удаление запаха',price: 1500 },
 ];
 
-const TELEGRAM = 'https://t.me/';
-const WHATSAPP = 'https://wa.me/';
-const PHONE = 'tel:+70000000000';
+const TELEGRAM = 'https://t.me/+79936014901';
+const WHATSAPP = 'https://wa.me/79936014901';
+const PHONE = 'tel:+79936014901';
 
 function BeforeAfterSlider({ before, after, item }: { before: string; after: string; item: string }) {
   const [pos, setPos] = useState(50);
