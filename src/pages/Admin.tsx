@@ -11,8 +11,7 @@ function SbpQr({ sum, leadId }: { sum: number; leadId: number }) {
   const [open, setOpen] = useState(false);
   const canvasRef = useRef<HTMLDivElement>(null);
   if (sum <= 0) return null;
-  const phone = SBP_PHONE.replace(/\D/g, '');
-  const sbpUrl = `https://qr.nspk.ru/AS1000${phone}?sum=${sum * 100}&currency=RUB&paymentPurpose=%D0%97%D0%B0%D0%BA%D0%B0%D0%B7+%E2%84%96${leadId}`;
+  const sbpUrl = `${SBP_PHONE} ${sum.toLocaleString('ru-RU')} руб. Заказ №${leadId} (СБП)`;
 
   const handleDownload = () => {
     const canvas = canvasRef.current?.querySelector('canvas') as HTMLCanvasElement | null;
