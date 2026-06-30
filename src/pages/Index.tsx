@@ -333,8 +333,8 @@ const Index = () => {
         <div className="container flex items-center justify-between h-16 px-4 md:px-8">
           <button onClick={() => scrollTo('hero')} className="flex items-center">
             <img
-              src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/de0b62e5-b681-4231-a70a-b60a28a8c0e7.png"
-              alt="Чистекс"
+              src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/e50719c1-844c-449b-8cce-1a62414ae30d.png"
+              alt="Кликчист"
               className="h-24 w-auto object-contain"
             />
           </button>
@@ -584,13 +584,13 @@ const Index = () => {
         <div className="container px-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-muted-foreground text-sm">
           <div className="flex items-center">
             <img
-              src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/de0b62e5-b681-4231-a70a-b60a28a8c0e7.png"
-              alt="Чистекс"
+              src="https://cdn.poehali.dev/projects/07a52f30-72bd-43a7-943b-fb5b19303e7b/bucket/e50719c1-844c-449b-8cce-1a62414ae30d.png"
+              alt="Кликчист"
               className="h-9 w-auto object-contain"
             />
           </div>
           <p>Выездная химчистка мебели · Москва и область</p>
-          <p>© {new Date().getFullYear()} Чистекс</p>
+          <p>© {new Date().getFullYear()} Кликчист</p>
         </div>
       </footer>
 
