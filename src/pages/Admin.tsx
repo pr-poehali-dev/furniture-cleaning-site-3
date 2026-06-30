@@ -1,17 +1,41 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Icon from '@/components/ui/icon';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 
 const SBP_PHONE = '+79955014901';
 
 function SbpQr({ sum, leadId }: { sum: number; leadId: number }) {
   const [open, setOpen] = useState(false);
+  const canvasRef = useRef<HTMLDivElement>(null);
   if (sum <= 0) return null;
   const phone = SBP_PHONE.replace(/\D/g, '');
   const sbpUrl = `https://qr.nspk.ru/AS1000${phone}?sum=${sum * 100}&currency=RUB&paymentPurpose=%D0%97%D0%B0%D0%BA%D0%B0%D0%B7+%E2%84%96${leadId}`;
+
+  const handleDownload = () => {
+    const canvas = canvasRef.current?.querySelector('canvas') as HTMLCanvasElement | null;
+    if (!canvas) return;
+    const size = 320;
+    const pad = 24;
+    const out = document.createElement('canvas');
+    out.width = size + pad * 2;
+    out.height = size + pad * 2 + 40;
+    const ctx = out.getContext('2d')!;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(canvas, pad, pad, size, size);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Оплата заказа №${leadId} · ${sum.toLocaleString('ru-RU')} ₽`, out.width / 2, size + pad * 2 + 16);
+    const link = document.createElement('a');
+    link.download = `qr-zakaz-${leadId}.png`;
+    link.href = out.toDataURL('image/png');
+    link.click();
+  };
+
   return (
     <div className="mt-3">
       <button
@@ -26,9 +50,20 @@ function SbpQr({ sum, leadId }: { sum: number; leadId: number }) {
           <div className="bg-white p-3 rounded-2xl border border-border inline-block">
             <QRCodeSVG value={sbpUrl} size={160} />
           </div>
-          <p className="text-xs text-muted-foreground">
-            Клиент сканирует QR любым банком → оплачивает {sum.toLocaleString('ru-RU')} ₽ через СБП
-          </p>
+          <div ref={canvasRef} className="hidden">
+            <QRCodeCanvas value={sbpUrl} size={320} />
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <p className="text-xs text-muted-foreground">
+              Клиент сканирует QR любым банком → оплачивает {sum.toLocaleString('ru-RU')} ₽ через СБП
+            </p>
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap border border-border rounded-lg px-2.5 py-1.5"
+            >
+              <Icon name="Download" size={13} /> Скачать PNG
+            </button>
+          </div>
         </div>
       )}
     </div>
