@@ -55,6 +55,8 @@ interface DetailsProps {
   originalSum: number;
   services: Service[];
   scrollTop: () => void;
+  cushionEnabled: boolean;
+  setCushionEnabled: (v: boolean) => void;
 }
 
 export default function StepDetails({
@@ -65,10 +67,12 @@ export default function StepDetails({
   calcPrice, setStep,
   acceptedUpsells, setAcceptedUpsells, applyUpsellsAndGoToPrice,
   totalItems, totalSum, originalSum,
+  cushionEnabled, setCushionEnabled,
 }: DetailsProps) {
   const needsStraightDetail = selected.has('sofa_straight');
   const needsCornerDetail = selected.has('sofa_corner');
   const needsMattressDetail = selected.has('mattress');
+  const hasSofa = needsStraightDetail || needsCornerDetail;
 
   if (step === 'details') return (
     <div>
@@ -135,6 +139,29 @@ export default function StepDetails({
         )}
         {selected.has('kitchen') && (
           <CounterRow label="Количество кухонных уголков" id="kitchen" getCount={getCount} setCount={setCount} />
+        )}
+
+        {hasSofa && (
+          <div className="rounded-2xl border-2 border-border p-4 space-y-3">
+            <button
+              onClick={() => {
+                setCushionEnabled(v => !v);
+                if (!cushionEnabled) setCount('cushion', getCount('cushion') || 1);
+              }}
+              className="flex items-center gap-3 w-full text-left"
+            >
+              <div className={`w-5 h-5 rounded-md border-2 flex-shrink-0 flex items-center justify-center transition-all ${cushionEnabled ? 'bg-primary border-primary' : 'border-border'}`}>
+                {cushionEnabled && <Icon name="Check" size={12} className="text-primary-foreground" />}
+              </div>
+              <div>
+                <p className="font-semibold text-sm">Подушки диванные</p>
+                <p className="text-xs text-muted-foreground">300 ₽ за штуку</p>
+              </div>
+            </button>
+            {cushionEnabled && (
+              <CounterRow label="Количество подушек" id="cushion" getCount={getCount} setCount={setCount} />
+            )}
+          </div>
         )}
 
       </div>

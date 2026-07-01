@@ -15,6 +15,9 @@ export const FURNITURE_ITEMS = [
   { id: 'kitchen',      label: 'Кухонный уголок',   icon: 'UtensilsCrossed' },
 ];
 
+// Позиции, которые не выбираются на первом шаге, но добавляются в деталях
+export const HIDDEN_ADDONS = ['cushion'];
+
 export const SOFA_STRAIGHT_SIZES: Record<string, string> = {
   '2-местный': 'Диван прямой двухместный',
   '3-местный': 'Диван прямой трехместный',

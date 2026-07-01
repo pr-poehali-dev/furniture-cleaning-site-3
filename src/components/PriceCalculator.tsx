@@ -29,6 +29,7 @@ export default function PriceCalculator() {
   const [userComment, setUserComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [acceptedUpsells, setAcceptedUpsells] = useState<Set<string>>(new Set());
+  const [cushionEnabled, setCushionEnabled] = useState(false);
 
   const topRef = useRef<HTMLDivElement>(null);
 
@@ -91,6 +92,16 @@ export default function PriceCalculator() {
       addItemWithCount(items, 'Изголовье кровати', 'Изголовье кровати', getCount('headboard'), sum);
     if (selected.has('kitchen'))
       addItemWithCount(items, 'Кухонный уголок', 'Кухонный уголок', getCount('kitchen'), sum);
+    if (cushionEnabled) {
+      const count = getCount('cushion');
+      const priceStr = findPrice(services, 'Подушка диванная');
+      const num = parsePrice(priceStr) * count;
+      if (num > 0) {
+        const label = count > 1 ? `Подушка диванная × ${count}` : 'Подушка диванная';
+        items.push({ label, price: formatPrice(String(num)) });
+        sum.val += num;
+      }
+    }
 
     const autoBundle = getAutoBundle(selected);
     if (autoBundle && sum.val > 0) {
@@ -133,6 +144,16 @@ export default function PriceCalculator() {
       addItemWithCount(items, 'Изголовье кровати', 'Изголовье кровати', getCount('headboard'), sum);
     if (selected.has('kitchen'))
       addItemWithCount(items, 'Кухонный уголок', 'Кухонный уголок', getCount('kitchen'), sum);
+    if (cushionEnabled) {
+      const count = getCount('cushion');
+      const priceStr = findPrice(services, 'Подушка диванная');
+      const num = parsePrice(priceStr) * count;
+      if (num > 0) {
+        const label = count > 1 ? `Подушка диванная × ${count}` : 'Подушка диванная';
+        items.push({ label, price: formatPrice(String(num)) });
+        sum.val += num;
+      }
+    }
     return { items, sum };
   };
 
@@ -222,6 +243,7 @@ export default function PriceCalculator() {
     setBookingDate(null); setBookingTime('');
     setName(''); setPhone(''); setAddress(''); setUserComment('');
     setAcceptedUpsells(new Set());
+    setCushionEnabled(false);
     scrollTop();
   };
 
@@ -284,6 +306,8 @@ export default function PriceCalculator() {
           originalSum={originalSum}
           services={services}
           scrollTop={scrollTop}
+          cushionEnabled={cushionEnabled}
+          setCushionEnabled={setCushionEnabled}
         />
       )}
 
