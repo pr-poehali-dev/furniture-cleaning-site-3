@@ -121,11 +121,20 @@ export default function StepDetails({
         {selected.has('armchair') && (
           <CounterRow label="Количество кресел" id="armchair" getCount={getCount} setCount={setCount} />
         )}
+        {selected.has('armchair_pc') && (
+          <CounterRow label="Количество компьютерных кресел" id="armchair_pc" getCount={getCount} setCount={setCount} />
+        )}
         {selected.has('chair') && (
           <CounterRow label="Количество стульев" id="chair" getCount={getCount} setCount={setCount} />
         )}
         {selected.has('odor') && (
           <CounterRow label="Удаление запахов (предметов)" id="odor" getCount={getCount} setCount={setCount} />
+        )}
+        {selected.has('headboard') && (
+          <CounterRow label="Количество изголовий кровати" id="headboard" getCount={getCount} setCount={setCount} />
+        )}
+        {selected.has('kitchen') && (
+          <CounterRow label="Количество кухонных уголков" id="kitchen" getCount={getCount} setCount={setCount} />
         )}
 
       </div>
