@@ -83,7 +83,7 @@ export function getUpsells(selected: Set<string>): Upsell[] {
       addItems: ['sofa_straight'],
     });
   }
-  if (hasSofa && !hasOdor) {
+  if ((hasSofa || hasMattress) && !hasOdor) {
     result.push({
       id: 'pets',
       title: 'После питомцев',
