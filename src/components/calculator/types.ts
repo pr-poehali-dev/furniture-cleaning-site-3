@@ -59,7 +59,22 @@ export function formatPrice(priceStr: string): string {
   return num > 0 ? `${num.toLocaleString('ru-RU')} ₽` : '—';
 }
 
+// Возвращает название пакета, если выбранные позиции уже покрывают его условия
+export function getAutoBundle(selected: Set<string>): string | null {
+  const hasSofa = selected.has('sofa_straight') || selected.has('sofa_corner');
+  const hasMattress = selected.has('mattress');
+  const hasOdor = selected.has('odor');
+
+  if (hasSofa && hasMattress) return 'Семейный пакет';
+  if (hasSofa && hasOdor) return 'После питомцев';
+  if (hasMattress && hasOdor) return 'После питомцев';
+  return null;
+}
+
+// Upsell показывается только если пакет ещё не сработал автоматически
 export function getUpsells(selected: Set<string>): Upsell[] {
+  if (getAutoBundle(selected)) return [];
+
   const hasSofa = selected.has('sofa_straight') || selected.has('sofa_corner');
   const hasMattress = selected.has('mattress');
   const hasOdor = selected.has('odor');

@@ -3,7 +3,7 @@ import {
   Service, Step,
   SERVICES_URL, SUBMIT_LEAD_URL,
   SOFA_STRAIGHT_SIZES, SOFA_CORNER_SIZES, MATTRESS_SIZES,
-  findPrice, parsePrice, formatPrice, getUpsells,
+  findPrice, parsePrice, formatPrice, getUpsells, getAutoBundle,
 } from './calculator/types';
 import StepFurniture from './calculator/StepFurniture';
 import StepDetails from './calculator/StepDetails';
@@ -85,6 +85,19 @@ export default function PriceCalculator() {
       addItemWithCount(items, 'Стул с мягкой обивкой', 'Стул с мягкой обивкой', getCount('chair'), sum);
     if (selected.has('odor'))
       addItemWithCount(items, 'Удаление запахов', 'Удаление запахов', getCount('odor'), sum);
+
+    const autoBundle = getAutoBundle(selected);
+    if (autoBundle && sum.val > 0) {
+      const discount = Math.round(sum.val * 0.1);
+      items.push({ label: `Скидка «${autoBundle}» −10%`, price: `−${discount.toLocaleString('ru-RU')} ₽` });
+      setOriginalSum(sum.val);
+      sum.val = sum.val - discount;
+      setTotalItems(items);
+      setTotalSum(sum.val);
+      setStep('price');
+      scrollTop();
+      return;
+    }
 
     setTotalItems(items);
     setTotalSum(sum.val);
