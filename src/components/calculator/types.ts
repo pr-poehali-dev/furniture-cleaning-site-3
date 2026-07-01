@@ -9,7 +9,9 @@ export const FURNITURE_ITEMS = [
   { id: 'mattress',     label: 'Матрас',         icon: 'BedDouble' },
   { id: 'armchair',     label: 'Кресло',         icon: 'Armchair' },
   { id: 'chair',        label: 'Стул',           icon: 'Armchair' },
-  { id: 'odor',         label: 'Удаление запахов', icon: 'Wind' },
+  { id: 'odor',         label: 'Удаление запахов',  icon: 'Wind' },
+  { id: 'headboard',    label: 'Изголовье кровати', icon: 'BedDouble' },
+  { id: 'kitchen',      label: 'Кухонный уголок',   icon: 'UtensilsCrossed' },
 ];
 
 export const SOFA_STRAIGHT_SIZES: Record<string, string> = {

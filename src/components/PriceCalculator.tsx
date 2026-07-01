@@ -85,6 +85,10 @@ export default function PriceCalculator() {
       addItemWithCount(items, 'Стул с мягкой обивкой', 'Стул с мягкой обивкой', getCount('chair'), sum);
     if (selected.has('odor'))
       addItemWithCount(items, 'Удаление запахов', 'Удаление запахов', getCount('odor'), sum);
+    if (selected.has('headboard'))
+      addItemWithCount(items, 'Изголовье кровати', 'Изголовье кровати', getCount('headboard'), sum);
+    if (selected.has('kitchen'))
+      addItemWithCount(items, 'Кухонный уголок', 'Кухонный уголок', getCount('kitchen'), sum);
 
     const autoBundle = getAutoBundle(selected);
     if (autoBundle && sum.val > 0) {
@@ -121,6 +125,10 @@ export default function PriceCalculator() {
       addItemWithCount(items, 'Стул с мягкой обивкой', 'Стул с мягкой обивкой', getCount('chair'), sum);
     if (selected.has('odor'))
       addItemWithCount(items, 'Удаление запахов', 'Удаление запахов', getCount('odor'), sum);
+    if (selected.has('headboard'))
+      addItemWithCount(items, 'Изголовье кровати', 'Изголовье кровати', getCount('headboard'), sum);
+    if (selected.has('kitchen'))
+      addItemWithCount(items, 'Кухонный уголок', 'Кухонный уголок', getCount('kitchen'), sum);
     return { items, sum };
   };
 
