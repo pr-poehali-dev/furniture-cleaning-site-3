@@ -81,6 +81,8 @@ export default function PriceCalculator() {
       addItemWithCount(items, MATTRESS_SIZES[mattressSize], MATTRESS_SIZES[mattressSize], getCount('mattress'), sum);
     if (selected.has('armchair'))
       addItemWithCount(items, 'Кресло', 'Кресло', getCount('armchair'), sum);
+    if (selected.has('armchair_pc'))
+      addItemWithCount(items, 'Кресло компьютерное', 'Кресло компьютерное', getCount('armchair_pc'), sum);
     if (selected.has('chair'))
       addItemWithCount(items, 'Стул с мягкой обивкой', 'Стул с мягкой обивкой', getCount('chair'), sum);
     if (selected.has('odor'))
@@ -121,6 +123,8 @@ export default function PriceCalculator() {
       addItemWithCount(items, MATTRESS_SIZES[mattressSize], MATTRESS_SIZES[mattressSize], getCount('mattress'), sum);
     if (selected.has('armchair'))
       addItemWithCount(items, 'Кресло', 'Кресло', getCount('armchair'), sum);
+    if (selected.has('armchair_pc'))
+      addItemWithCount(items, 'Кресло компьютерное', 'Кресло компьютерное', getCount('armchair_pc'), sum);
     if (selected.has('chair'))
       addItemWithCount(items, 'Стул с мягкой обивкой', 'Стул с мягкой обивкой', getCount('chair'), sum);
     if (selected.has('odor'))
